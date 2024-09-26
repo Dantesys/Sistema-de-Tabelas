@@ -1,0 +1,6 @@
+CREATE TABLE Cliente (
+    codigo INTEGER PRIMARY KEY NOT NULL,
+    nome TEXT,
+    cidade TEXT,
+    bairro TEXT
+);

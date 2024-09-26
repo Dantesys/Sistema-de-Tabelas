@@ -1,0 +1,5 @@
+CREATE TABLE Entrega (
+    id INTEGER PRIMARY KEY NOT NULL,
+    nome TEXT,
+    data TEXT
+);
