@@ -4,3 +4,11 @@ CREATE TABLE Cliente (
     cidade TEXT,
     bairro TEXT
 );
+selectAll:
+SELECT * FROM Cliente;
+selectOne:
+SELECT * FROM Cliente WHERE codigo = ?;
+insertFast:
+INSERT INTO Cliente(codigo) VALUES (?);
+insertComplet:
+INSERT OR REPLACE INTO Cliente(codigo,nome,cidade,bairro) VALUES (?,?,?,?);

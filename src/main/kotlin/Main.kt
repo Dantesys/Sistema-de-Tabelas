@@ -14,6 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import com.dantesys.Database
+
 //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-explore-composables.html
 //https://cashapp.github.io/sqldelight/2.0.2/native_sqlite/
 @Composable
@@ -35,6 +39,8 @@ fun app() {
 }
 
 fun main() = application {
+    val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:sistema.db")
+    Database.Schema.create(driver)
     Window(onCloseRequest = ::exitApplication,title = "Sistema de Tabelas") {
         app()
     }
