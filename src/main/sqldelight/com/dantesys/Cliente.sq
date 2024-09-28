@@ -6,9 +6,15 @@ CREATE TABLE Cliente (
 );
 selectAll:
 SELECT * FROM Cliente;
-selectOne:
-SELECT * FROM Cliente WHERE codigo = ?;
+selectClienteCodigo:
+SELECT * FROM Cliente WHERE codigo = :codigo;
 insertFast:
 INSERT INTO Cliente(codigo) VALUES (?);
 insertComplet:
 INSERT OR REPLACE INTO Cliente(codigo,nome,cidade,bairro) VALUES (?,?,?,?);
+contarCLientes:
+SELECT count(*) FROM Cliente;
+selectPG:
+SELECT *
+FROM Cliente
+LIMIT :limit OFFSET :offset;

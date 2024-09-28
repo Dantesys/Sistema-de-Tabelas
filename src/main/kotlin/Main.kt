@@ -14,15 +14,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import app.cash.paging.PagingSource
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import app.cash.sqldelight.paging3.QueryPagingSource
 import com.dantesys.Database
+import com.dantesys.EntregaQueries
+import data.Entregas
+import kotlinx.coroutines.Dispatchers
+import java.util.*
 
 //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-explore-composables.html
 //https://cashapp.github.io/sqldelight/2.0.2/native_sqlite/
 @Composable
 @Preview
-fun app() {
+fun app(driver: SqlDriver) {
+    val database = Database(driver)
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -39,9 +46,10 @@ fun app() {
 }
 
 fun main() = application {
-    val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:sistema.db")
+    val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:sistema.db",
+        properties = Properties().apply { put("foreign_keys", "true")})
     Database.Schema.create(driver)
     Window(onCloseRequest = ::exitApplication,title = "Sistema de Tabelas") {
-        app()
+        app(driver)
     }
 }

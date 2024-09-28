@@ -3,3 +3,29 @@ CREATE TABLE Entrega (
     nome TEXT,
     data TEXT
 );
+contarEntrega:
+SELECT count(*) FROM Entrega;
+selectJoin:
+SELECT * FROM Entrega ORDER BY data DESC LIMIT 10;
+selectPGEntrega:
+SELECT * FROM Entrega ORDER BY data DESC LIMIT :limit OFFSET :offset;
+selectEntregaID:
+SELECT * FROM Entrega
+LEFT JOIN EntregaCliente ON Entrega.id=EntregaCliente.entregaID
+LEFT JOIN Cliente ON EntregaCliente.entregaID=Cliente.codigo
+WHERE Entrega.id = :id;
+selectFiltroNDEntrega:
+SELECT * FROM Entrega
+WHERE (nome LIKE (:nome || "%") OR ("%" || :nome)) AND (data BETWEEN :datai AND :dataf)
+ORDER BY data DESC
+LIMIT :limit OFFSET :offset;
+selectFiltroNomeEntrega:
+SELECT * FROM Entrega
+WHERE (nome LIKE (:nome || "%") OR ("%" || :nome))
+ORDER BY data DESC
+LIMIT :limit OFFSET :offset;
+selectFiltroDataEntrega:
+SELECT * FROM Entrega
+WHERE (data BETWEEN :datai AND :dataf)
+ORDER BY nome DESC
+LIMIT :limit OFFSET :offset;
