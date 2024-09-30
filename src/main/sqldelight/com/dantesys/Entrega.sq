@@ -1,7 +1,7 @@
-CREATE TABLE Entrega (
+CREATE TABLE IF NOT EXISTS Entrega (
     id INTEGER PRIMARY KEY NOT NULL,
-    nome TEXT,
-    data TEXT
+    nome TEXT NOT NULL,
+    data TEXT NOT NULL
 );
 contarEntrega:
 SELECT count(*) FROM Entrega;

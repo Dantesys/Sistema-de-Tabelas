@@ -1,7 +1,7 @@
 package data
 
 data class Cliente(
-    val codigo:Int,
+    val codigo:Long,
 ){
     var cidade:String = "";
     var bairo:String = "";

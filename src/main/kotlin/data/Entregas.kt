@@ -1,7 +1,5 @@
 package data
 
-data class Entregas(val nome:String){
-    val id:Int = 0;
-    var data:String = "";
-    var clientes:ArrayList<Cliente> = arrayListOf();
+data class Entregas(val id:Long, val nome:String, val data:String){
+    var clientes:List<Cliente> = arrayListOf();
 }

@@ -1,4 +1,4 @@
-CREATE TABLE Cliente (
+CREATE TABLE IF NOT EXISTS Cliente (
     codigo INTEGER PRIMARY KEY NOT NULL,
     nome TEXT,
     cidade TEXT,

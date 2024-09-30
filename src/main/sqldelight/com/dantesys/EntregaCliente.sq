@@ -1,6 +1,8 @@
-CREATE TABLE EntregaCliente (
+CREATE TABLE IF NOT EXISTS EntregaCliente (
     clienteID INTEGER NOT NULL,
     entregaID INTEGER NOT NULL,
     FOREIGN KEY(clienteID) REFERENCES Cliente(codigo),
     FOREIGN KEY(entregaID) REFERENCES Entrega(id)
 );
+contarEntregaCliente:
+SELECT count(*) FROM EntregaCliente WHERE entregaID = :id;
