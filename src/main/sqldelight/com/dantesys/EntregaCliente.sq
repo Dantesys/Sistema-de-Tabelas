@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS EntregaCliente (
     clienteID INTEGER NOT NULL,
+    posicao INTEGER NOT NULL,
     entregaID INTEGER NOT NULL,
     FOREIGN KEY(clienteID) REFERENCES Cliente(codigo),
     FOREIGN KEY(entregaID) REFERENCES Entrega(id)

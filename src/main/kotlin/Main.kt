@@ -1,13 +1,12 @@
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,11 +14,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -27,8 +24,6 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.dantesys.Database
 import data.dao.EntregasDAO
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -43,9 +38,18 @@ fun app(driver: SqlDriver) {
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         Row(Modifier.fillMaxSize()){
-            Column(Modifier.fillMaxWidth(0.2f),Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.fillMaxWidth(0.2f).fillMaxHeight().background(Color(250,255,196)),Arrangement.spacedBy(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource("logo.png"),
+                    contentDescription = "Logo",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(200.dp)
+                )
                 Button(onClick = {},Modifier.fillMaxWidth(0.9f)){
-                    Text("Clientes")
+                    Text("Novo Clientes")
+                }
+                Button(onClick = {},Modifier.fillMaxWidth(0.9f)){
+                    Text("Ver Clientes")
                 }
                 Button(onClick = {},Modifier.fillMaxWidth(0.9f)){
                     Text("Nova Tabela")
@@ -55,29 +59,33 @@ fun app(driver: SqlDriver) {
                 }
             }
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(
-                    painter = painterResource("logo.png"),
-                    contentDescription = "Logo",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(200.dp)
-                )
                 if(entregas.isEmpty()){
                     Text("No momento não tem entregas em aberto")
+                    Image(
+                        painter = painterResource("logo.png"),
+                        contentDescription = "Logo",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.size(200.dp)
+                    )
                 }else{
                     Text("Ultimas entregas")
-                    Row(Modifier.fillMaxWidth(0.75f)){
-                        Text("Nome",Modifier.fillMaxWidth(0.5f).border(1.dp, Color.Black).padding(8.dp))
-                        Text("Data",Modifier.fillMaxWidth(0.3f).border(1.dp, Color.Black).padding(8.dp))
-                        Text("Entregas",Modifier.border(1.dp, Color.Black).padding(8.dp))
+                    Row(Modifier.fillMaxWidth(0.75f).border(1.dp, Color.Black),Arrangement.SpaceAround){
+                        Text("Nome",Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                        Text("Data",Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                        Text("Entregas",Modifier.padding(8.dp))
+                        Text("Detalhar",Modifier.padding(8.dp))
                     }
                     for (entrega in entregas){
                         val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
                         val localDateTime = LocalDate.parse(entrega.data)
                         val qtd = EntregasDAO.contarClientes(database,entrega.id)
-                        Row(Modifier.fillMaxWidth(0.5f)){
-                            Text(entrega.nome,Modifier.fillMaxWidth(0.5f).border(1.dp, Color.Black).padding(8.dp))
-                            Text(localDateTime.format(formatter).toString(),Modifier.fillMaxWidth(0.3f).border(1.dp, Color.Black).padding(8.dp))
-                            Text(qtd.toString(),Modifier.border(1.dp, Color.Black).padding(8.dp))
+                        Row(Modifier.fillMaxWidth(0.75f).border(1.dp, Color.Black),Arrangement.SpaceAround){
+                            Text(entrega.nome,Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                            Text(localDateTime.format(formatter).toString(),Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                            Text(qtd.toString(),Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                            IconButton(onClick = {}){
+                                Icon(imageVector =  Icons.Default.Info,"icone de informação")
+                            }
                         }
                     }
                 }
