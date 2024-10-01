@@ -35,6 +35,9 @@ dependencies {
     implementation("app.cash.sqldelight:sqlite-driver:2.0.2")
     implementation("app.cash.sqldelight:androidx-paging3-extensions:2.0.2")
     implementation("app.cash.sqldelight:coroutines-extensions:2.0.2")
+    val voyagerVersion = "1.1.0-beta02"
+    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
 }
 
 compose.desktop {

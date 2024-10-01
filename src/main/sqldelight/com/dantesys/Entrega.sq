@@ -11,8 +11,6 @@ selectPGEntrega:
 SELECT * FROM Entrega ORDER BY data DESC LIMIT :limit OFFSET :offset;
 selectEntregaID:
 SELECT * FROM Entrega
-LEFT JOIN EntregaCliente ON Entrega.id=EntregaCliente.entregaID
-LEFT JOIN Cliente ON EntregaCliente.entregaID=Cliente.codigo
 WHERE Entrega.id = :id;
 selectFiltroNDEntrega:
 SELECT * FROM Entrega

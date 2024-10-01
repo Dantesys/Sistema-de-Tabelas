@@ -7,3 +7,5 @@ CREATE TABLE IF NOT EXISTS EntregaCliente (
 );
 contarEntregaCliente:
 SELECT count(*) FROM EntregaCliente WHERE entregaID = :id;
+selecionarClientesbyEntrega:
+SELECT * FROM EntregaCliente LEFT JOIN Cliente ON EntregaCliente.clienteID = Cliente.codigo WHERE entregaID = :id ORDER BY posicao ASC;
