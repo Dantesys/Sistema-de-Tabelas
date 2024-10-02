@@ -7,7 +7,7 @@ import data.Entregas
 import data.dao.EntregasDAO
 import kotlinx.coroutines.*
 
-class InicioScreenModel(val db:Database) : StateScreenModel<InicioScreenModel.State>(State.Loading) {
+class InicioScreenModel() : StateScreenModel<InicioScreenModel.State>(State.Loading) {
     sealed class State {
         object Loading : State()
         data class Result(val entregas: List<Entregas>, val clientes: List<Long>) : State()

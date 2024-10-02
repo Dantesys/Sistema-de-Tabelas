@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import app.cash.sqldelight.db.SqlDriver
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -31,15 +33,20 @@ import java.time.format.DateTimeFormatter
 
 data class InicioScreen(val driver: SqlDriver) : Screen {
 
+    override val key: ScreenKey = uniqueScreenKey
+
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val db = Database(driver)
-        val screenModel = rememberScreenModel { InicioScreenModel(db) }
+        val screenModel = rememberScreenModel { InicioScreenModel() }
         val state by screenModel.state.collectAsState()
         when (val result = state) {
             is InicioScreenModel.State.Loading -> LoadingContent()
             is InicioScreenModel.State.Result -> Inicio(result.entregas,result.clientes,navigator)
+        }
+        LaunchedEffect(currentCompositeKeyHash){
+            screenModel.getInicio(db)
         }
     }
     @Composable

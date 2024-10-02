@@ -7,7 +7,6 @@ import com.dantesys.Database
 import telas.InicioScreen
 import java.util.*
 
-//https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-explore-composables.html
 //https://cashapp.github.io/sqldelight/2.0.2/native_sqlite/
 fun main() = application {
     val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:sistema.db",
