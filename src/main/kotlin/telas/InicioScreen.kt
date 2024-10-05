@@ -42,7 +42,7 @@ data class InicioScreen(val driver: SqlDriver) : Screen {
         val screenModel = rememberScreenModel { InicioScreenModel() }
         val state by screenModel.state.collectAsState()
         when (val result = state) {
-            is InicioScreenModel.State.Loading -> LoadingContent()
+            is InicioScreenModel.State.Loading -> LoadingContent(navigator)
             is InicioScreenModel.State.Result -> Inicio(result.entregas,result.clientes,navigator)
         }
         LaunchedEffect(currentCompositeKeyHash){
@@ -50,7 +50,7 @@ data class InicioScreen(val driver: SqlDriver) : Screen {
         }
     }
     @Composable
-    fun LoadingContent() {
+    fun LoadingContent(navigator: Navigator) {
         MaterialTheme {
             Row(Modifier.fillMaxSize()){
                 Column(
@@ -68,7 +68,7 @@ data class InicioScreen(val driver: SqlDriver) : Screen {
                     Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
                         Text("Ver Clientes")
                     }
-                    Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
+                    Button(onClick = {navigator.push(NTabelaScreen(driver))}, Modifier.fillMaxWidth(0.9f)){
                         Text("Nova Tabela")
                     }
                     Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
@@ -106,7 +106,7 @@ data class InicioScreen(val driver: SqlDriver) : Screen {
                     Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
                         Text("Ver Clientes")
                     }
-                    Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
+                    Button(onClick = {navigator.push(NTabelaScreen(driver))}, Modifier.fillMaxWidth(0.9f)){
                         Text("Nova Tabela")
                     }
                     Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
