@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS Entrega (
     nome TEXT NOT NULL,
     data TEXT NOT NULL
 );
+adicionar:
+INSERT INTO Entrega (id,nome,data) VALUES (:id,:nome,:data);
 contarEntrega:
 SELECT count(*) FROM Entrega;
 selectJoin:

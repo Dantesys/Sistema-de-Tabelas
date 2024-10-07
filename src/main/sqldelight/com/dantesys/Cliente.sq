@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS Cliente (
 selectAll:
 SELECT * FROM Cliente;
 selectClienteCodigo:
-SELECT * FROM Cliente WHERE codigo = :codigo;
+SELECT * FROM Cliente WHERE codigo = :codigo LIMIT 1;
 insertFast:
 INSERT INTO Cliente(codigo) VALUES (?);
 insertComplet:

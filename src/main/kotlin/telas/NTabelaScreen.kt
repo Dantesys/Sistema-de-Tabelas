@@ -5,17 +5,26 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import app.cash.sqldelight.db.SqlDriver
 import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
@@ -25,6 +34,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.dantesys.Database
 import com.dantesys.sistemadetabelas.generated.resources.Res
 import com.dantesys.sistemadetabelas.generated.resources.logo
+import data.Cliente
 import data.Entregas
 import models.NTabelaScreenModel
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -55,18 +65,37 @@ class NTabelaScreen(val driver: SqlDriver) : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val db = Database(driver)
         val screenModel = rememberScreenModel { NTabelaScreenModel() }
-        novatabelaScreen(navigator)
+        novatabelaScreen(navigator,screenModel,db)
     }
     @Composable
-    fun novatabelaScreen(navigator: Navigator) {
+    fun novatabelaScreen(navigator: Navigator,screenModel: NTabelaScreenModel,db:Database) {
         val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
         //val localDateTime = LocalDate.parse()
-        val nova = remember {
-            mutableStateOf(Entregas(0,"",""))
+        val nome = remember {
+            mutableStateOf("")
+        }
+        val data = remember {
+            mutableStateOf("")
+        }
+        val numero = remember {
+            mutableLongStateOf(0)
         }
         val dialogState = remember {
             mutableStateOf(false)
         }
+        val novoState = remember {
+            mutableStateOf(false)
+        }
+        val contState = remember {
+            mutableStateOf(false)
+        }
+        val clientecodigo = remember {
+            mutableLongStateOf(0)
+        }
+        val clientes = remember {
+            mutableListOf<Cliente>()
+        }
+        val focusRequester = remember { FocusRequester() }
         Box(Modifier.fillMaxSize()){
             Row(Modifier.fillMaxSize()){
                 Column(Modifier.fillMaxWidth(0.2f).fillMaxHeight().background(Color(250,255,196)), Arrangement.spacedBy(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -91,17 +120,28 @@ class NTabelaScreen(val driver: SqlDriver) : Screen {
                 }
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
-                        Button(onClick = {imprimir(nova.value)},Modifier.fillMaxWidth(0.2f)){
+                        Button(onClick = {imprimir(Entregas(numero.value,nome.value,data.value))},Modifier.fillMaxWidth(0.2f)){
                             Text("Salvar e imprimir")
                         }
-                        Button(onClick = {dialogState.value = salvar(nova.value)}, Modifier.fillMaxWidth(0.2f)){
+                        Button(onClick = {dialogState.value = salvar(Entregas(numero.value,nome.value,data.value),screenModel,db)}, Modifier.fillMaxWidth(0.2f)){
                             Text("Salvar")
                         }
                     }
                     Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround,Alignment.CenterVertically){
-                        OutlinedTextField(nova.value.id.toString(),{nova.value.id = it.toLong()},label = {Text("N° da entrega")},keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-                        OutlinedTextField(nova.value.nome,{nova.value.nome = it},label = {Text("Nome da entrega")})
-                        OutlinedTextField(nova.value.data,{nova.value.data = it},label = {Text("Data de Saída")})
+                        OutlinedTextField(numero.value.toString(),{numero.value = it.toLongOrNull()?: 0},label = {Text("N° da entrega")},keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                        OutlinedTextField(nome.value,{nome.value = it},label = {Text("Nome da entrega")})
+                        OutlinedTextField(data.value,{data.value = it},label = {Text("Data de Saída")})
+                    }
+                    Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround,Alignment.CenterVertically){
+                        if(contState.value){
+                            Button(onClick = {novoState.value = true; clientecodigo.value = 0}, Modifier.fillMaxWidth(0.2f)){
+                                Text("Adicionar Cliente")
+                            }
+                        }else{
+                            Button(onClick = {novoState.value = true; contState.value=true;clientecodigo.value = 0;salvar(Entregas(numero.value,nome.value,data.value),screenModel,db)}, Modifier.fillMaxWidth(0.2f)){
+                                Text("Adicionar Cliente")
+                            }
+                        }
                     }
                     Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround,Alignment.CenterVertically){
                         //TODO
@@ -119,7 +159,7 @@ class NTabelaScreen(val driver: SqlDriver) : Screen {
                                     }
                                 }
                                 var cor: Color
-                                itemsIndexed(nova.value.clientes){i,cliente ->
+                                itemsIndexed(clientes){i,cliente ->
                                     val num = i+1
                                     if(num%2==0){
                                         cor = Color.LightGray
@@ -160,10 +200,38 @@ class NTabelaScreen(val driver: SqlDriver) : Screen {
                     }
                 )
             }
+            if (novoState.value) {
+                LaunchedEffect(Unit) {
+                    focusRequester.requestFocus()
+                }
+                AlertDialog(onDismissRequest = {novoState.value = false},
+                    title = { Text("Cliente") },
+                    text = {
+                        OutlinedTextField(
+                            clientecodigo.value.toString(),
+                            {clientecodigo.value = it.toLongOrNull()?: 0},
+                            label = {Text("Código do cliente")},
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Send),
+                            keyboardActions = KeyboardActions(onSend = {novoState.value = false;clientes.add(screenModel.addCliente(db,clientecodigo.value, (clientes.size+1).toLong(),numero.value))}),
+                            modifier = Modifier.focusRequester(focusRequester)
+                        )
+                    },
+                    confirmButton = {
+                        Button(onClick = {novoState.value = false;clientes.add(screenModel.addCliente(db,clientecodigo.value, (clientes.size+1).toLong(),numero.value))}) {
+                            Text("OK")
+                        }
+                    }
+                )
+            }
         }
     }
-    fun salvar(entrega: Entregas):Boolean{
-        //TODO
+    fun salvar(entrega: Entregas,screenModel: NTabelaScreenModel,db: Database):Boolean{
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val formatteroriginal = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val localDateTime = LocalDate.parse(entrega.data,formatteroriginal)
+        val dataf = localDateTime.format(formatter).toString()
+        entrega.data = dataf
+        screenModel.criarEntrega(db,entrega)
         return true;
     }
     fun imprimir(entrega: Entregas){

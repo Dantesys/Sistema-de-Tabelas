@@ -15,6 +15,14 @@ class EntregasDAO{
                 Entregas(e.id,e.nome,e.data_)
             }
         }
+        fun adicionar(db:Database,entregas: Entregas){
+            val entregaQueries = db.entregaQueries
+            entregaQueries.adicionar(entregas.id,entregas.nome,entregas.data)
+        }
+        fun adicionarCliente(db:Database,clienteID:Long,entregaID:Long,posicao:Long){
+            val entregaClienteQueries = db.entregaClienteQueries
+            entregaClienteQueries.adicionar(clienteID,posicao,entregaID)
+        }
         fun contarClientesInicio(db:Database):List<Long>{
             val entregaQueries: EntregaQueries = db.entregaQueries
             val entregaClienteQueries: EntregaClienteQueries = db.entregaClienteQueries
