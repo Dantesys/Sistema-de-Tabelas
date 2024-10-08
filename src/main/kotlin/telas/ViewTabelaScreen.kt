@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.runtime.*
@@ -27,7 +28,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.dantesys.Database
 import data.Entregas
 import telas.parts.loadingContent
-import models.VTabelaScreenModel
+import models.ViewTabelaScreenModel
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
@@ -49,18 +50,18 @@ import javax.print.attribute.HashPrintRequestAttributeSet
 import javax.print.attribute.standard.Sides
 import java.awt.Color as JColor
 
-class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
+class ViewTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
 
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val db = Database(driver)
-        val screenModel = rememberScreenModel { VTabelaScreenModel() }
+        val screenModel = rememberScreenModel { ViewTabelaScreenModel() }
         val state by screenModel.state.collectAsState()
         when (val result = state) {
-            is VTabelaScreenModel.State.Loading -> loadingContent(navigator,true,driver)
-            is VTabelaScreenModel.State.Result -> vertabelaScreen(result.entrega,navigator)
+            is ViewTabelaScreenModel.State.Loading -> loadingContent(navigator,true,driver)
+            is ViewTabelaScreenModel.State.Result -> vertabelaScreen(result.entrega,navigator)
         }
         LaunchedEffect(currentCompositeKeyHash){
             screenModel.getClientes(db,id)
@@ -83,11 +84,25 @@ class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
                         IconButton(onClick = {imprimir(entrega)}){
-                            Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
+                            Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                Text("Imprimir")
+                                Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
+                            }
                         }
                         Text(entrega.nome+" - "+localDateTime.format(formatter).toString(), style = TextStyle(fontSize = 30.sp))
                         IconButton(onClick = {dialogState.value = gerarPDF(entrega)}){
-                            Icon(imageVector =  Icons.Default.PictureAsPdf,"icone de salvar")
+                            Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                Text("Salvar PDF")
+                                Icon(imageVector =  Icons.Default.PictureAsPdf,"icone de salvar")
+                            }
+                        }
+                        if(entrega.pedencia){
+                            IconButton(onClick = {navigator.push(EditTabelaScreen(driver,id))}){
+                                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                    Text("Editar")
+                                    Icon(imageVector =  Icons.Default.Edit,"icone de editar")
+                                }
+                            }
                         }
                     }
                     Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround, Alignment.CenterVertically){

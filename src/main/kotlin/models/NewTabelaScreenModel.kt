@@ -7,7 +7,7 @@ import data.Entregas
 import data.dao.ClienteDAO
 import data.dao.EntregasDAO
 
-class NTabelaScreenModel : ScreenModel {
+class NewTabelaScreenModel : ScreenModel {
     fun addCliente(db:Database,codigo: Long):Cliente{
         val cliente = ClienteDAO.addFast(db,codigo)
         return cliente

@@ -78,7 +78,7 @@ data class InicioScreen(val driver: SqlDriver) : Screen {
                                 Text(entrega.nome, Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(localDateTime.format(formatter).toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(qtd.toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                IconButton(onClick = {navigator.push(VTabelaScreen(driver,entrega.id))}){
+                                IconButton(onClick = {navigator.push(ViewTabelaScreen(driver,entrega.id))}){
                                     Icon(imageVector =  Icons.Default.Search,"icone de informação")
                                 }
                             }
@@ -102,7 +102,7 @@ data class InicioScreen(val driver: SqlDriver) : Screen {
                                 Text(entrega.nome, Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(localDateTime.format(formatter).toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(qtd.toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                IconButton(onClick = {navigator.push(VTabelaScreen(driver,entrega.id))}){
+                                IconButton(onClick = {navigator.push(ViewTabelaScreen(driver,entrega.id))}){
                                     Icon(imageVector =  Icons.Default.Search,"icone de informação")
                                 }
                             }

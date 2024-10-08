@@ -5,8 +5,10 @@ CREATE TABLE IF NOT EXISTS EntregaCliente (
     FOREIGN KEY(clienteID) REFERENCES Cliente(codigo),
     FOREIGN KEY(entregaID) REFERENCES Entrega(id)
 );
+removerEntrega:
+DELETE FROM EntregaCliente WHERE entregaID=:entregaID;
 adicionar:
-INSERT INTO EntregaCliente (clienteID,posicao,entregaID) VALUES (:cliente,:posicao,:entrega);
+INSERT OR REPLACE INTO EntregaCliente (clienteID,posicao,entregaID) VALUES (:cliente,:posicao,:entrega);
 contarEntregaCliente:
 SELECT count(*) FROM EntregaCliente WHERE entregaID = :id;
 selecionarClientesbyEntrega:

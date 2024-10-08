@@ -7,7 +7,7 @@ import data.Entregas
 import data.dao.EntregasDAO
 import kotlinx.coroutines.launch
 
-class VTabelaScreenModel : StateScreenModel<VTabelaScreenModel.State>(State.Loading) {
+class EditTabelaScreenModel : StateScreenModel<EditTabelaScreenModel.State>(State.Loading) {
     sealed class State {
         data object Loading : State()
         data class Result(val entrega: Entregas) : State()
@@ -17,5 +17,9 @@ class VTabelaScreenModel : StateScreenModel<VTabelaScreenModel.State>(State.Load
             mutableState.value = State.Loading
             mutableState.value = State.Result(EntregasDAO.selecionaEntrega(db,id))
         }
+    }
+    fun criarEntrega(db:Database,entrega:Entregas){
+        EntregasDAO.removeAll(db,entrega)
+        EntregasDAO.adicionar(db,entrega)
     }
 }

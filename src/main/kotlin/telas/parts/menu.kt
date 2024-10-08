@@ -1,14 +1,12 @@
 package telas.parts
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import app.cash.sqldelight.db.SqlDriver
@@ -16,7 +14,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.dantesys.sistemadetabelas.generated.resources.Res
 import com.dantesys.sistemadetabelas.generated.resources.logo
 import org.jetbrains.compose.resources.imageResource
-import telas.NTabelaScreen
+import telas.NewTabelaScreen
 
 @Composable
 fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment.Horizontal,navigator: Navigator,driver: SqlDriver,inicio:Boolean=true,ntabela:Boolean=false,vtabela:Boolean=false,ncliente:Boolean=false,vcliente:Boolean=false){
@@ -47,7 +45,7 @@ fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment
             }
         }
         if(!ntabela){
-            Button(onClick = {navigator.push(NTabelaScreen(driver))}, Modifier.fillMaxWidth(0.9f)){
+            Button(onClick = {navigator.push(NewTabelaScreen(driver))}, Modifier.fillMaxWidth(0.9f)){
                 Text("Nova Tabela")
             }
         }

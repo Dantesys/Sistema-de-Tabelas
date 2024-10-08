@@ -5,11 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -21,8 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.cash.sqldelight.db.SqlDriver
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -32,9 +33,9 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.dantesys.Database
-import data.Cliente
 import data.Entregas
-import models.NTabelaScreenModel
+import models.EditTabelaScreenModel
+import telas.parts.loadingContent
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
@@ -45,6 +46,7 @@ import org.apache.pdfbox.printing.PDFPageable
 import org.vandeseer.easytable.TableDrawer
 import org.vandeseer.easytable.settings.HorizontalAlignment
 import org.vandeseer.easytable.structure.Table
+import org.vandeseer.easytable.structure.Row as TRow
 import org.vandeseer.easytable.structure.cell.TextCell
 import telas.parts.menu
 import java.awt.print.PrinterJob
@@ -55,30 +57,36 @@ import java.util.*
 import javax.print.attribute.HashPrintRequestAttributeSet
 import javax.print.attribute.standard.Sides
 import java.awt.Color as JColor
-import org.vandeseer.easytable.structure.Row as TRow
 
-class NTabelaScreen(private val driver: SqlDriver) : Screen {
+class EditTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
 
     override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val db = Database(driver)
-        val screenModel = rememberScreenModel { NTabelaScreenModel() }
-        novatabelaScreen(navigator,screenModel,db)
+        val screenModel = rememberScreenModel { EditTabelaScreenModel() }
+        val state by screenModel.state.collectAsState()
+        when (val result = state) {
+            is EditTabelaScreenModel.State.Loading -> loadingContent(navigator,true,driver)
+            is EditTabelaScreenModel.State.Result -> edittabelaScreen(result.entrega,navigator,screenModel,db)
+        }
+        LaunchedEffect(currentCompositeKeyHash){
+            screenModel.getClientes(db,id)
+        }
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun novatabelaScreen(navigator: Navigator,screenModel: NTabelaScreenModel,db:Database) {
-        val nome = remember {mutableStateOf("")}
-        val data = remember {mutableStateOf("")}
-        val numero = remember {mutableLongStateOf(0)}
-        val dialogState = remember {mutableStateOf(false)}
-        val clientecodigo = remember {mutableLongStateOf(0)}
-        val clientes = remember {mutableListOf<Cliente>()}
+    fun edittabelaScreen(entrega: Entregas,navigator: Navigator,screenModel:EditTabelaScreenModel,db:Database) {
+        val dialogState = remember { mutableStateOf(false) }
+        val nome = remember { mutableStateOf(entrega.nome) }
         val focusManager = LocalFocusManager.current
         var showDatePickerDialog by remember {mutableStateOf(false)}
         val datePickerState = rememberDatePickerState()
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val localDateTime = LocalDate.parse(entrega.data)
+        val data = remember { mutableStateOf(localDateTime.format(formatter)) }
         Box(Modifier.fillMaxSize()){
             if (showDatePickerDialog) {
                 DatePickerDialog(
@@ -104,20 +112,25 @@ class NTabelaScreen(private val driver: SqlDriver) : Screen {
                     Alignment.CenterHorizontally,
                     navigator,
                     driver,
-                    false,
-                    ntabela = true
+                    false
                 )
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
-                        IconButton(onClick = {imprimir(Entregas(numero.value,nome.value,data.value),screenModel,db,clientes);navigator.popUntilRoot()}){
-                            Icon(imageVector =  Icons.Default.Print,"icone de imprimir")
+                        IconButton(onClick = {entrega.nome=nome.value;entrega.data=localDateTime.format(formatter2);dialogState.value = imprimir(entrega,screenModel,db)}){
+                            Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                Text("Salvar e imprimir")
+                                Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
+                            }
                         }
-                        IconButton(onClick = {dialogState.value = salvar(Entregas(numero.value,nome.value,data.value),screenModel,db,clientes)}){
-                            Icon(imageVector =  Icons.Default.Save,"icone de salvar")
+                        Text("Entrega Nº"+entrega.id.toString(), style = TextStyle(fontSize = 30.sp))
+                        IconButton(onClick = {entrega.nome=nome.value;entrega.data=localDateTime.format(formatter2);dialogState.value = salvar(entrega,screenModel,db)}){
+                            Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                Text("Salvar")
+                                Icon(imageVector =  Icons.Default.Save,"icone de salvar")
+                            }
                         }
                     }
                     Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround,Alignment.CenterVertically){
-                        OutlinedTextField(numero.value.toString(),{numero.value = it.toLongOrNull()?: 0},label = {Text("N° da entrega")},keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
                         OutlinedTextField(nome.value,{nome.value = it},label = {Text("Nome da entrega")})
                         OutlinedTextField(data.value,{}, modifier = Modifier.onFocusEvent {
                             if (it.isFocused) {
@@ -126,29 +139,23 @@ class NTabelaScreen(private val driver: SqlDriver) : Screen {
                             }
                         },label = {Text("Data de Saída")},readOnly = true)
                     }
-                    Row(Modifier.fillMaxWidth().padding(20.dp),Arrangement.Center,Alignment.CenterVertically){
-                        OutlinedTextField(clientecodigo.value.toString(),{clientecodigo.value = it.toLongOrNull()?: 0},modifier = Modifier.padding(5.dp),label = {Text("Cliente")},keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-                        IconButton(modifier = Modifier.padding(5.dp).background(Color.LightGray),onClick = {clientes.add(adicionarCliente(clientecodigo.value,screenModel, db));clientecodigo.value = 0}){
-                            Icon(imageVector =  Icons.Default.PersonAdd,"icone de adicionar")
-                        }
-                    }
-                    Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround,Alignment.CenterVertically){
-                        //TODO
-                        //Cadastro Tabela
+                    Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround, Alignment.CenterVertically){
                         Box(Modifier.fillMaxSize().padding(50.dp).align(Alignment.CenterVertically)){
-                            val stateScroll = rememberLazyListState()
-                            LazyColumn(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,state = stateScroll) {
+                            val state = rememberLazyListState()
+                            LazyColumn(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,state = state) {
                                 item {
                                     Row(Modifier.fillMaxWidth().border(1.dp, Color.Black)){
                                         Text("Entrega", Modifier.fillMaxWidth(0.15f).padding(8.dp))
                                         Text("Código", Modifier.fillMaxWidth(0.15f).padding(8.dp))
                                         Text("Nome Fantasia", Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                         Text("Cidade", Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text("Bairro", Modifier.padding(8.dp))
+                                        Text("Bairro", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text("Editar", Modifier.padding(8.dp))
+                                        Text("Excluir", Modifier.padding(8.dp))
                                     }
                                 }
                                 var cor: Color
-                                itemsIndexed(clientes){i,cliente ->
+                                itemsIndexed(entrega.clientes){i,cliente ->
                                     val num = i+1
                                     cor = if(num%2==0){
                                         Color.LightGray
@@ -164,14 +171,24 @@ class NTabelaScreen(private val driver: SqlDriver) : Screen {
                                         Text(cliente.codigo.toString(), Modifier.fillMaxWidth(0.15f).padding(8.dp))
                                         Text(cliente.nome, Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                         Text(cliente.cidade, Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.bairro, Modifier.padding(8.dp))
+                                        Text(cliente.bairro, Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        IconButton(onClick = {}){
+                                            Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                                Icon(imageVector =  Icons.Default.Edit,"icone de editar")
+                                            }
+                                        }
+                                        IconButton(onClick = {}){
+                                            Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                                Icon(imageVector =  Icons.Default.Remove,"icone de excluir")
+                                            }
+                                        }
                                     }
                                 }
                             }
                             VerticalScrollbar(
                                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                                 adapter = rememberScrollbarAdapter(
-                                    scrollState = stateScroll
+                                    scrollState = state
                                 )
                             )
                         }
@@ -180,10 +197,10 @@ class NTabelaScreen(private val driver: SqlDriver) : Screen {
             }
             if (dialogState.value) {
                 AlertDialog(onDismissRequest = {dialogState.value = false},
-                    title = { Text("AVISO") },
-                    text = { Text("Tabela Salva com Sucesso") },
+                    title = {Text("AVISO")},
+                    text = {Text("Salvo com Sucesso")},
                     confirmButton = {
-                        Button(onClick = {dialogState.value = false;navigator.popUntilRoot()}) {
+                        Button(onClick = {dialogState.value = false;navigator.pop()}) {
                             Text("OK")
                         }
                     }
@@ -191,21 +208,12 @@ class NTabelaScreen(private val driver: SqlDriver) : Screen {
             }
         }
     }
-    private fun adicionarCliente(id:Long,screenModel:NTabelaScreenModel,db:Database):Cliente{
-        return screenModel.addCliente(db,id)
-    }
-    private fun salvar(entrega: Entregas,screenModel: NTabelaScreenModel,db: Database, clientes:List<Cliente>):Boolean{
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val formatteroriginal = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        val localDateTime = LocalDate.parse(entrega.data,formatteroriginal)
-        val dataf = localDateTime.format(formatter).toString()
-        entrega.data = dataf
-        entrega.clientes = clientes
+    private fun salvar(entrega: Entregas,screenModel: EditTabelaScreenModel,db:Database):Boolean{
         screenModel.criarEntrega(db,entrega)
         return true
     }
-    private fun imprimir(entrega: Entregas,screenModel: NTabelaScreenModel,db: Database, clientes:List<Cliente>){
-        if(salvar(entrega,screenModel,db,clientes)){
+    private fun imprimir(entrega:Entregas,screenModel: EditTabelaScreenModel,db:Database):Boolean{
+        if(salvar(entrega,screenModel,db)){
             var limite = 47
             var limiteCont = 50
             var resto = 0
@@ -218,40 +226,28 @@ class NTabelaScreen(private val driver: SqlDriver) : Screen {
             document.documentInformation = info
             val pagina = PDPage(PDRectangle.A4)
             document.addPage(pagina)
-            val conteudo = PDPageContentStream(document, pagina)
+            val conteudo = PDPageContentStream(document,pagina)
             val tabela = Table.builder()
                 .addColumnsOfWidth(55f,55f,150f,150f,150f)
                 .fontSize(11)
                 .font(PDType1Font(Standard14Fonts.getMappedFontName("Arial")))
                 .wordBreak(true)
                 .borderColor(JColor.BLACK)
-            tabela.addRow(
-                TRow.builder()
-                    .add(TextCell.builder()
-                        .text(entrega.nome+" - "+localDateTime.format(formatter))
-                        .horizontalAlignment(HorizontalAlignment.CENTER)
-                        .colSpan(5).fontSize(20).build())
-                    .build()
+            tabela.addRow(TRow.builder()
+                .add(TextCell.builder().text(entrega.nome+" - "+localDateTime.format(formatter))
+                    .horizontalAlignment(HorizontalAlignment.CENTER)
+                    .colSpan(5)
+                    .fontSize(20)
+                    .build())
+                .build()
             )
-            tabela.addRow(
-                TRow.builder()
-                    .add(TextCell.builder()
-                        .text("Entrega")
-                        .horizontalAlignment(HorizontalAlignment.CENTER)
-                        .borderWidth(1f).build())
-                    .add(TextCell.builder().text("Código")
-                        .horizontalAlignment(HorizontalAlignment.CENTER)
-                        .borderWidth(1f).build())
-                    .add(TextCell.builder().text("Nome Fantasia")
-                        .horizontalAlignment(HorizontalAlignment.CENTER)
-                        .borderWidth(1f).build())
-                    .add(TextCell.builder().text("Cidade")
-                        .horizontalAlignment(HorizontalAlignment.CENTER)
-                        .borderWidth(1f).build())
-                    .add(TextCell.builder().text("Bairro")
-                        .horizontalAlignment(HorizontalAlignment.CENTER)
-                        .borderWidth(1f).build())
-                    .build()
+            tabela.addRow(TRow.builder()
+                .add(TextCell.builder().text("Entrega").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(TextCell.builder().text("Código").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(TextCell.builder().text("Nome Fantasia").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(TextCell.builder().text("Cidade").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(TextCell.builder().text("Bairro").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .build()
             )
             var num = 1
             if(entrega.clientes.size<limite){
@@ -265,25 +261,14 @@ class NTabelaScreen(private val driver: SqlDriver) : Screen {
                 if(num%2==1){
                     cor = JColor.LIGHT_GRAY
                 }
-                tabela.addRow(
-                    TRow.builder()
-                        .add(TextCell.builder().text("$num°")
-                            .horizontalAlignment(HorizontalAlignment.LEFT)
-                            .borderWidth(1f).build())
-                        .add(TextCell.builder().text("${cliente.codigo}")
-                            .horizontalAlignment(HorizontalAlignment.CENTER)
-                            .borderWidth(1f).build())
-                        .add(TextCell.builder().text(cliente.nome)
-                            .horizontalAlignment(HorizontalAlignment.CENTER)
-                            .borderWidth(1f).build())
-                        .add(TextCell.builder().text(cliente.cidade)
-                            .horizontalAlignment(HorizontalAlignment.CENTER)
-                            .borderWidth(1f).build())
-                        .add(TextCell.builder().text(cliente.bairro)
-                            .horizontalAlignment(HorizontalAlignment.CENTER)
-                            .borderWidth(1f).build())
-                        .backgroundColor(cor)
-                        .build()
+                tabela.addRow(TRow.builder()
+                    .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
+                    .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.nome).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.cidade).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.bairro).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .backgroundColor(cor)
+                    .build()
                 )
                 num++
             }
@@ -302,38 +287,27 @@ class NTabelaScreen(private val driver: SqlDriver) : Screen {
                 }
                 val pagina2 = PDPage(PDRectangle.A4)
                 document.addPage(pagina2)
-                val conteudo2 = PDPageContentStream(document, pagina2)
+                val conteudo2 = PDPageContentStream(document,pagina2)
                 val tabela2 = Table.builder()
                     .addColumnsOfWidth(55f,55f,150f,150f,150f)
                     .fontSize(11)
                     .font(PDType1Font(Standard14Fonts.getMappedFontName("Arial")))
                     .wordBreak(true)
-                    .borderColor(_root_ide_package_.java.awt.Color.BLACK)
+                    .borderColor(JColor.BLACK)
                 while(cont<limiteCont){
                     val cliente = entrega.clientes[num-1]
                     var cor = JColor.WHITE
                     if(num%2==1){
                         cor = JColor.LIGHT_GRAY
                     }
-                    tabela2.addRow(
-                        TRow.builder()
-                            .add(TextCell.builder().text("$num°")
-                                .horizontalAlignment(HorizontalAlignment.LEFT)
-                                .borderWidth(1f).build())
-                            .add(TextCell.builder().text("${cliente.codigo}")
-                                .horizontalAlignment(HorizontalAlignment.CENTER)
-                                .borderWidth(1f).build())
-                            .add(TextCell.builder().text(cliente.nome)
-                                .horizontalAlignment(HorizontalAlignment.CENTER)
-                                .borderWidth(1f).build())
-                            .add(TextCell.builder().text(cliente.cidade)
-                                .horizontalAlignment(HorizontalAlignment.CENTER)
-                                .borderWidth(1f).build())
-                            .add(TextCell.builder().text(cliente.bairro)
-                                .horizontalAlignment(HorizontalAlignment.CENTER)
-                                .borderWidth(1f).build())
-                            .backgroundColor(cor)
-                            .build()
+                    tabela2.addRow(TRow.builder()
+                        .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
+                        .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                        .add(TextCell.builder().text(cliente.nome).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                        .add(TextCell.builder().text(cliente.cidade).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                        .add(TextCell.builder().text(cliente.bairro).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                        .backgroundColor(cor)
+                        .build()
                     )
                     num++
                     cont++
@@ -357,6 +331,7 @@ class NTabelaScreen(private val driver: SqlDriver) : Screen {
             }
             document.close()
         }
+        return true
     }
     private fun Long.toBrazilianDateFormat(
         pattern: String = "dd/MM/yyyy"

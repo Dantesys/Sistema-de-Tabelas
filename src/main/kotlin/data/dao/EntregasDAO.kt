@@ -12,10 +12,14 @@ class EntregasDAO{
             val entregaQueries: EntregaQueries = db.entregaQueries
             val entregas = entregaQueries.selectJoin().executeAsList()
             return entregas.map { e ->
-                Entregas(e.id,e.nome,e.data_)
+                Entregas(e.id,e.nome,e.data_, e.pedencia == 1L)
             }
         }
-        fun adicionar(db:Database,entregas: Entregas){
+        fun removeAll(db:Database,entregas: Entregas){
+            val entregaClienteQueries = db.entregaClienteQueries
+            entregaClienteQueries.removerEntrega(entregas.id)
+        }
+        fun adicionar(db:Database, entregas: Entregas){
             val entregaQueries = db.entregaQueries
             var pedencia = entregas.clientes.size
             var pos:Long = 1
@@ -23,7 +27,7 @@ class EntregasDAO{
             entregas.clientes.map { c ->
                 adicionarCliente(db,c.codigo,entregas.id,pos)
                 pos++
-                if(c.nome!=""){
+                if(c.nome!="" && c.cidade!="" && c.bairro!=""){
                     pedencia--
                 }
             }
@@ -41,11 +45,7 @@ class EntregasDAO{
             val entregaQueries: EntregaQueries = db.entregaQueries
             val entregas = entregaQueries.selectJoinP().executeAsList()
             return entregas.map { e ->
-                if(e.pedencia.toInt() == 0){
-                    Entregas(e.id,e.nome,e.data_,false)
-                }else{
-                    Entregas(e.id,e.nome,e.data_,true)
-                }
+                Entregas(e.id,e.nome,e.data_,e.pedencia == 1L)
             }
         }
         fun contarClientesPendenciaInicio(db:Database):List<Long>{
@@ -87,7 +87,7 @@ class EntregasDAO{
                 }
                 clientes.add(cli)
             }
-            val retorno = Entregas(entrega.id,entrega.nome,entrega.data_)
+            val retorno = Entregas(entrega.id,entrega.nome,entrega.data_,entrega.pedencia == 1L)
             retorno.clientes = clientes
             return retorno
         }

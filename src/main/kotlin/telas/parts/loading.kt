@@ -18,7 +18,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.dantesys.sistemadetabelas.generated.resources.Res
 import com.dantesys.sistemadetabelas.generated.resources.logo
 import org.jetbrains.compose.resources.imageResource
-import telas.NTabelaScreen
+import telas.NewTabelaScreen
 
 @Composable
 fun loadingContent(navigator: Navigator, inicio:Boolean, driver: SqlDriver) {
@@ -41,7 +41,7 @@ fun loadingContent(navigator: Navigator, inicio:Boolean, driver: SqlDriver) {
                 Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
                     Text("Ver Clientes")
                 }
-                Button(onClick = {navigator.push(NTabelaScreen(driver))}, Modifier.fillMaxWidth(0.9f)){
+                Button(onClick = {navigator.push(NewTabelaScreen(driver))}, Modifier.fillMaxWidth(0.9f)){
                     Text("Nova Tabela")
                 }
                 Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
