@@ -7,15 +7,15 @@ import data.Entregas
 import data.dao.EntregasDAO
 import kotlinx.coroutines.*
 
-class InicioScreenModel() : StateScreenModel<InicioScreenModel.State>(State.Loading) {
+class InicioScreenModel : StateScreenModel<InicioScreenModel.State>(State.Loading) {
     sealed class State {
-        object Loading : State()
-        data class Result(val entregas: List<Entregas>, val clientes: List<Long>) : State()
+        data object Loading : State()
+        data class Result(val entregas: List<Entregas>, val clientes: List<Long>,val pedencias:List<Entregas>,val clientesp: List<Long>) : State()
     }
     fun getInicio(db:Database){
         screenModelScope.launch {
             mutableState.value = State.Loading
-            mutableState.value = State.Result(EntregasDAO.selecionaInicio(db), EntregasDAO.contarClientesInicio(db))
+            mutableState.value = State.Result(EntregasDAO.selecionaInicio(db), EntregasDAO.contarClientesInicio(db), EntregasDAO.getPedencias(db),EntregasDAO.contarClientesPendenciaInicio(db))
         }
     }
 }

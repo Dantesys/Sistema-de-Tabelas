@@ -7,15 +7,15 @@ import data.Entregas
 import data.dao.EntregasDAO
 import kotlinx.coroutines.launch
 
-class VTabelaScreenModel() : StateScreenModel<VTabelaScreenModel.State>(State.Loading) {
+class VTabelaScreenModel : StateScreenModel<VTabelaScreenModel.State>(State.Loading) {
     sealed class State {
-        object Loading : State()
+        data object Loading : State()
         data class Result(val entrega: Entregas) : State()
     }
     fun getClientes(db:Database,id:Long){
         screenModelScope.launch {
-            mutableState.value = models.VTabelaScreenModel.State.Loading
-            mutableState.value = models.VTabelaScreenModel.State.Result(EntregasDAO.selecionaEntrega(db,id))
+            mutableState.value = State.Loading
+            mutableState.value = State.Result(EntregasDAO.selecionaEntrega(db,id))
         }
     }
 }

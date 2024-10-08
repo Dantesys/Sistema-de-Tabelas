@@ -28,10 +28,11 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.runtime)
     implementation(compose.foundation)
-    implementation(compose.material)
+    implementation(compose.material3)
     implementation(compose.ui)
     implementation(compose.components.resources)
     implementation(compose.components.uiToolingPreview)
+    implementation(compose.materialIconsExtended)
     implementation("app.cash.sqldelight:sqlite-driver:2.0.2")
     implementation("app.cash.sqldelight:androidx-paging3-extensions:2.0.2")
     implementation("app.cash.sqldelight:coroutines-extensions:2.0.2")
@@ -51,6 +52,10 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "sistemadetabelas"
             packageVersion = "1.0.0"
+            windows {
+                dirChooser = true
+                iconFile.set(project.file("icon.ico"))
+            }
         }
     }
 }

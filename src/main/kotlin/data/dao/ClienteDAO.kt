@@ -12,11 +12,11 @@ class ClienteDAO {
                 clienteQueries.insertFast(codigo)
                 return Cliente(codigo)
             }
-            var cliente_novo = Cliente(cliente.codigo)
-            cliente_novo.nome = cliente.nome?: ""
-            cliente_novo.cidade = cliente.cidade?: ""
-            cliente_novo.bairro = cliente.bairro?: ""
-            return cliente_novo
+            val clienteNovo = Cliente(cliente.codigo)
+            clienteNovo.nome = cliente.nome?: ""
+            clienteNovo.cidade = cliente.cidade?: ""
+            clienteNovo.bairro = cliente.bairro?: ""
+            return clienteNovo
         }
     }
 }

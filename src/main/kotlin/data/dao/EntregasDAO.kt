@@ -17,11 +17,46 @@ class EntregasDAO{
         }
         fun adicionar(db:Database,entregas: Entregas){
             val entregaQueries = db.entregaQueries
-            entregaQueries.adicionar(entregas.id,entregas.nome,entregas.data)
+            var pedencia = entregas.clientes.size
+            var pos:Long = 1
+            entregaQueries.adicionar(entregas.id,entregas.nome,entregas.data,1)
+            entregas.clientes.map { c ->
+                adicionarCliente(db,c.codigo,entregas.id,pos)
+                pos++
+                if(c.nome!=""){
+                    pedencia--
+                }
+            }
+            if(pedencia<=0){
+                entregaQueries.adicionar(entregas.id,entregas.nome,entregas.data,0)
+            }else{
+                entregaQueries.adicionar(entregas.id,entregas.nome,entregas.data,1)
+            }
         }
         fun adicionarCliente(db:Database,clienteID:Long,entregaID:Long,posicao:Long){
             val entregaClienteQueries = db.entregaClienteQueries
             entregaClienteQueries.adicionar(clienteID,posicao,entregaID)
+        }
+        fun getPedencias(db:Database):List<Entregas>{
+            val entregaQueries: EntregaQueries = db.entregaQueries
+            val entregas = entregaQueries.selectJoinP().executeAsList()
+            return entregas.map { e ->
+                if(e.pedencia.toInt() == 0){
+                    Entregas(e.id,e.nome,e.data_,false)
+                }else{
+                    Entregas(e.id,e.nome,e.data_,true)
+                }
+            }
+        }
+        fun contarClientesPendenciaInicio(db:Database):List<Long>{
+            val entregaQueries: EntregaQueries = db.entregaQueries
+            val entregaClienteQueries: EntregaClienteQueries = db.entregaClienteQueries
+            val entregas = entregaQueries.selectJoinP().executeAsList()
+            val contados:MutableList<Long> = mutableListOf()
+            entregas.map { e ->
+                contados.add(entregaClienteQueries.contarEntregaCliente(e.id).executeAsOne())
+            }
+            return contados
         }
         fun contarClientesInicio(db:Database):List<Long>{
             val entregaQueries: EntregaQueries = db.entregaQueries
@@ -40,7 +75,7 @@ class EntregasDAO{
             val cliente = entregaClienteQueries.selecionarClientesbyEntrega(id).executeAsList()
             val clientes:MutableList<Cliente> = mutableListOf()
             cliente.map { c ->
-                var cli = Cliente(c.clienteID)
+                val cli = Cliente(c.clienteID)
                 if(c.nome != null){
                     cli.nome = c.nome
                 }

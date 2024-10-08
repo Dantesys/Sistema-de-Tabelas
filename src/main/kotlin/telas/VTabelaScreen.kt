@@ -6,11 +6,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,9 +25,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.dantesys.Database
-import com.dantesys.sistemadetabelas.generated.resources.Res
-import com.dantesys.sistemadetabelas.generated.resources.logo
 import data.Entregas
+import telas.parts.loadingContent
 import models.VTabelaScreenModel
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -34,12 +35,12 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts
 import org.apache.pdfbox.printing.PDFPageable
-import org.jetbrains.compose.resources.imageResource
 import org.vandeseer.easytable.TableDrawer
 import org.vandeseer.easytable.settings.HorizontalAlignment
 import org.vandeseer.easytable.structure.Table
 import org.vandeseer.easytable.structure.Row as TRow
 import org.vandeseer.easytable.structure.cell.TextCell
+import telas.parts.menu
 import java.awt.print.PrinterJob
 import java.io.File
 import java.time.LocalDate
@@ -58,51 +59,11 @@ class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
         val screenModel = rememberScreenModel { VTabelaScreenModel() }
         val state by screenModel.state.collectAsState()
         when (val result = state) {
-            is VTabelaScreenModel.State.Loading -> LoadingContent(navigator)
+            is VTabelaScreenModel.State.Loading -> loadingContent(navigator,true,driver)
             is VTabelaScreenModel.State.Result -> vertabelaScreen(result.entrega,navigator)
         }
         LaunchedEffect(currentCompositeKeyHash){
             screenModel.getClientes(db,id)
-        }
-    }
-    @Composable
-    fun LoadingContent(navigator: Navigator) {
-        MaterialTheme {
-            Row(Modifier.fillMaxSize()){
-                Column(
-                    Modifier.fillMaxWidth(0.2f).fillMaxHeight().background(Color(250,255,196)),
-                    Arrangement.spacedBy(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(
-                        bitmap = imageResource(Res.drawable.logo),
-                        contentDescription = "Logo",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.size(200.dp)
-                    )
-                    Button(onClick = {navigator.popUntilRoot()}, Modifier.fillMaxWidth(0.9f)){
-                        Text("Inicio")
-                    }
-                    Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
-                        Text("Novo Clientes")
-                    }
-                    Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
-                        Text("Ver Clientes")
-                    }
-                    Button(onClick = {navigator.push(NTabelaScreen(driver))}, Modifier.fillMaxWidth(0.9f)){
-                        Text("Nova Tabela")
-                    }
-                    Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
-                        Text("Ver Tabelas")
-                    }
-                }
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            }
         }
     }
     @Composable
@@ -112,38 +73,21 @@ class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
         val dialogState = remember { mutableStateOf(false) }
         Box(Modifier.fillMaxSize()){
             Row(Modifier.fillMaxSize()){
-                Column(Modifier.fillMaxWidth(0.2f).fillMaxHeight().background(Color(250,255,196)),
-                    Arrangement.spacedBy(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(
-                        bitmap = imageResource(Res.drawable.logo),
-                        contentDescription = "Logo",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.size(200.dp)
-                    )
-                    Button(onClick = {navigator.popUntilRoot()}, Modifier.fillMaxWidth(0.9f)){
-                        Text("Inicio")
-                    }
-                    Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
-                        Text("Novo Clientes")
-                    }
-                    Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
-                        Text("Ver Clientes")
-                    }
-                    Button(onClick = {navigator.push(NTabelaScreen(driver))}, Modifier.fillMaxWidth(0.9f)){
-                        Text("Nova Tabela")
-                    }
-                    Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
-                        Text("Ver Tabelas")
-                    }
-                }
+                menu(Modifier.fillMaxWidth(0.2f).fillMaxHeight().background(Color(250,255,196)),
+                    Arrangement.spacedBy(10.dp),
+                    Alignment.CenterHorizontally,
+                    navigator,
+                    driver,
+                    false
+                )
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
-                        Button(onClick = {imprimir(entrega)}, Modifier.fillMaxWidth(0.2f)){
-                            Text("Imprimir")
+                        IconButton(onClick = {imprimir(entrega)}){
+                            Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
                         }
                         Text(entrega.nome+" - "+localDateTime.format(formatter).toString(), style = TextStyle(fontSize = 30.sp))
-                        Button(onClick = {dialogState.value = gerarPDF(entrega)}, Modifier.fillMaxWidth(0.2f)){
-                            Text("Salvar PDF")
+                        IconButton(onClick = {dialogState.value = gerarPDF(entrega)}){
+                            Icon(imageVector =  Icons.Default.PictureAsPdf,"icone de salvar")
                         }
                     }
                     Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround, Alignment.CenterVertically){
@@ -162,10 +106,10 @@ class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                                 var cor: Color
                                 itemsIndexed(entrega.clientes){i,cliente ->
                                     val num = i+1
-                                    if(num%2==0){
-                                        cor = Color.LightGray
+                                    cor = if(num%2==0){
+                                        Color.LightGray
                                     }else{
-                                        cor = Color.White
+                                        Color.White
                                     }
                                     Row(Modifier.fillMaxWidth().background(cor)){
                                         if(num<10){
@@ -203,11 +147,11 @@ class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
             }
         }
     }
-    fun gerarPDF(entrega:Entregas):Boolean{
+    private fun gerarPDF(entrega:Entregas):Boolean{
         File("./tabelas").mkdir()
-        var limite = 47;
-        var limite_cont = 50;
-        var resto = 0;
+        var limite = 47
+        var limiteCont = 50
+        var resto = 0
         val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
         val localDateTime = LocalDate.parse(entrega.data)
         val document = PDDocument()
@@ -266,15 +210,15 @@ class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
         val desenhar = TableDrawer.builder()
             .contentStream(conteudo)
             .startX(20f)
-            .startY(pagina.getMediaBox().getUpperRightY() - 20f)
+            .startY(pagina.mediaBox.upperRightY - 20f)
             .table(tabela.build())
             .build()
         desenhar.draw()
         conteudo.close()
         while(resto>0){
             var cont = 0
-            if(resto<=limite_cont){
-                limite_cont = resto+1
+            if(resto<=limiteCont){
+                limiteCont = resto+1
             }
             val pagina2 = PDPage(PDRectangle.A4)
             document.addPage(pagina2)
@@ -285,7 +229,7 @@ class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                 .font(PDType1Font(Standard14Fonts.getMappedFontName("Arial")))
                 .wordBreak(true)
                 .borderColor(JColor.BLACK)
-            while(cont<limite_cont){
+            while(cont<limiteCont){
                 val cliente = entrega.clientes[num-1]
                 var cor = JColor.WHITE
                 if(num%2==1){
@@ -306,21 +250,21 @@ class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
             val desenhar2 = TableDrawer.builder()
                 .contentStream(conteudo2)
                 .startX(20f)
-                .startY(pagina.getMediaBox().getUpperRightY() - 20f)
+                .startY(pagina.mediaBox.upperRightY - 20f)
                 .table(tabela2.build())
                 .build()
             desenhar2.draw()
             conteudo2.close()
-            resto -= limite_cont
+            resto -= limiteCont
         }
         document.save("./tabelas/"+entrega.nome+"-"+entrega.data+".pdf")
         document.close()
-        return true;
+        return true
     }
-    fun imprimir(entrega:Entregas){
-        var limite = 47;
-        var limite_cont = 50;
-        var resto = 0;
+    private fun imprimir(entrega:Entregas){
+        var limite = 47
+        var limiteCont = 50
+        var resto = 0
         val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
         val localDateTime = LocalDate.parse(entrega.data)
         val document = PDDocument()
@@ -379,15 +323,15 @@ class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
         val desenhar = TableDrawer.builder()
             .contentStream(conteudo)
             .startX(20f)
-            .startY(pagina.getMediaBox().getUpperRightY() - 20f)
+            .startY(pagina.mediaBox.upperRightY - 20f)
             .table(tabela.build())
             .build()
         desenhar.draw()
         conteudo.close()
         while(resto>0){
             var cont = 0
-            if(resto<=limite_cont){
-                limite_cont = resto+1
+            if(resto<=limiteCont){
+                limiteCont = resto+1
             }
             val pagina2 = PDPage(PDRectangle.A4)
             document.addPage(pagina2)
@@ -398,7 +342,7 @@ class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                 .font(PDType1Font(Standard14Fonts.getMappedFontName("Arial")))
                 .wordBreak(true)
                 .borderColor(JColor.BLACK)
-            while(cont<limite_cont){
+            while(cont<limiteCont){
                 val cliente = entrega.clientes[num-1]
                 var cor = JColor.WHITE
                 if(num%2==1){
@@ -419,17 +363,17 @@ class VTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
             val desenhar2 = TableDrawer.builder()
                 .contentStream(conteudo2)
                 .startX(20f)
-                .startY(pagina.getMediaBox().getUpperRightY() - 20f)
+                .startY(pagina.mediaBox.upperRightY - 20f)
                 .table(tabela2.build())
                 .build()
             desenhar2.draw()
             conteudo2.close()
-            resto -= limite_cont
+            resto -= limiteCont
         }
         val job = PrinterJob.getPrinterJob()
         job.setPageable(PDFPageable(document))
         val att = HashPrintRequestAttributeSet()
-        att.add(Sides.TWO_SIDED_LONG_EDGE);
+        att.add(Sides.TWO_SIDED_LONG_EDGE)
         if(job.printDialog(att)){
             job.print(att)
         }

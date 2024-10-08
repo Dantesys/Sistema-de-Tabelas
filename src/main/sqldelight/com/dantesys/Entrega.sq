@@ -1,14 +1,17 @@
 CREATE TABLE IF NOT EXISTS Entrega (
     id INTEGER PRIMARY KEY NOT NULL,
     nome TEXT NOT NULL,
-    data TEXT NOT NULL
+    data TEXT NOT NULL,
+    pedencia INTEGER NOT NULL
 );
 adicionar:
-INSERT INTO Entrega (id,nome,data) VALUES (:id,:nome,:data);
+INSERT OR REPLACE INTO Entrega (id,nome,data,pedencia) VALUES (:id,:nome,:data,:pedencia);
 contarEntrega:
 SELECT count(*) FROM Entrega;
 selectJoin:
-SELECT * FROM Entrega ORDER BY data DESC LIMIT 10;
+SELECT * FROM Entrega WHERE pedencia=0 ORDER BY data DESC LIMIT 10;
+selectJoinP:
+SELECT * FROM Entrega WHERE pedencia=1 ORDER BY data DESC LIMIT 10;
 selectPGEntrega:
 SELECT * FROM Entrega ORDER BY data DESC LIMIT :limit OFFSET :offset;
 selectEntregaID:
