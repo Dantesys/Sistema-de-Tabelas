@@ -75,7 +75,7 @@ data class InicioScreen(val driver: SqlDriver) : Screen {
                             val qtd = clientes[entregas.indexOf(entrega)]
                             Row(Modifier.fillMaxWidth(0.75f).border(1.dp, Color.Black), Arrangement.SpaceAround){
                                 Text(entrega.id.toString(), Modifier.fillMaxWidth(0.1f).padding(8.dp))
-                                Text(entrega.nome, Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                Text(entrega.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(localDateTime.format(formatter).toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(qtd.toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 IconButton(onClick = {navigator.push(ViewTabelaScreen(driver,entrega.id))}){
@@ -99,7 +99,7 @@ data class InicioScreen(val driver: SqlDriver) : Screen {
                             val qtd = clientesp[pedencias.indexOf(entrega)]
                             Row(Modifier.fillMaxWidth(0.75f).border(1.dp, Color.Black), Arrangement.SpaceAround){
                                 Text(entrega.id.toString(), Modifier.fillMaxWidth(0.1f).padding(8.dp))
-                                Text(entrega.nome, Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                Text(entrega.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(localDateTime.format(formatter).toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(qtd.toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 IconButton(onClick = {navigator.push(ViewTabelaScreen(driver,entrega.id))}){

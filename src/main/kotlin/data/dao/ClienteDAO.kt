@@ -18,5 +18,9 @@ class ClienteDAO {
             clienteNovo.bairro = cliente.bairro?: ""
             return clienteNovo
         }
+        fun edit(db: Database,cliente: Cliente){
+            val clienteQueries = db.clienteQueries
+            clienteQueries.insertComplet(cliente.codigo,cliente.nome,cliente.cidade,cliente.bairro)
+        }
     }
 }

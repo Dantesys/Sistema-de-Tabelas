@@ -9,7 +9,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -33,6 +32,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.dantesys.Database
+import data.Cliente
 import data.Entregas
 import models.EditTabelaScreenModel
 import telas.parts.loadingContent
@@ -79,6 +79,12 @@ class EditTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
     @Composable
     fun edittabelaScreen(entrega: Entregas,navigator: Navigator,screenModel:EditTabelaScreenModel,db:Database) {
         val dialogState = remember { mutableStateOf(false) }
+        val editState = remember { mutableStateOf(false) }
+        val cNome = remember { mutableStateOf("") }
+        val cCidade = remember { mutableStateOf("") }
+        val cBairro = remember { mutableStateOf("") }
+        val cCodigo = remember { mutableLongStateOf(0) }
+        val eCliente = remember { mutableStateOf(Cliente(0)) }
         val nome = remember { mutableStateOf(entrega.nome) }
         val focusManager = LocalFocusManager.current
         var showDatePickerDialog by remember {mutableStateOf(false)}
@@ -151,11 +157,14 @@ class EditTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                                         Text("Cidade", Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                         Text("Bairro", Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                         Text("Editar", Modifier.padding(8.dp))
-                                        Text("Excluir", Modifier.padding(8.dp))
                                     }
                                 }
                                 var cor: Color
                                 itemsIndexed(entrega.clientes){i,cliente ->
+                                    var p = true
+                                    if(cliente.nome != "" && cliente.cidade != "" && cliente.bairro != ""){
+                                        p=false
+                                    }
                                     val num = i+1
                                     cor = if(num%2==0){
                                         Color.LightGray
@@ -163,23 +172,16 @@ class EditTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                                         Color.White
                                     }
                                     Row(Modifier.fillMaxWidth().background(cor)){
-                                        if(num<10){
-                                            Text("0$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        }else{
-                                            Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        }
+                                        Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
                                         Text(cliente.codigo.toString(), Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        Text(cliente.nome, Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.cidade, Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.bairro, Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        IconButton(onClick = {}){
-                                            Column(horizontalAlignment = Alignment.CenterHorizontally){
-                                                Icon(imageVector =  Icons.Default.Edit,"icone de editar")
-                                            }
-                                        }
-                                        IconButton(onClick = {}){
-                                            Column(horizontalAlignment = Alignment.CenterHorizontally){
-                                                Icon(imageVector =  Icons.Default.Remove,"icone de excluir")
+                                        Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text(cliente.bairro.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        if(p){
+                                            IconButton(onClick = {eCliente.value=cliente;cCodigo.value=cliente.codigo;cNome.value=cliente.nome;cCidade.value=cliente.cidade;cBairro.value=cliente.bairro;editState.value=true}){
+                                                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                                    Icon(imageVector =  Icons.Default.Edit,"icone de editar")
+                                                }
                                             }
                                         }
                                     }
@@ -200,8 +202,31 @@ class EditTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                     title = {Text("AVISO")},
                     text = {Text("Salvo com Sucesso")},
                     confirmButton = {
-                        Button(onClick = {dialogState.value = false;navigator.pop()}) {
+                        Button(onClick = {dialogState.value = false;navigator.popUntil { it==ViewTabelaScreen::class }}) {
                             Text("OK")
+                        }
+                    }
+                )
+            }
+            if(editState.value){
+                AlertDialog(onDismissRequest = {editState.value = false},
+                    title = {Text("EDITAR")},
+                    text = {
+                        Column{
+                            Text("Código: "+cCodigo.value.toString())
+                            OutlinedTextField(cNome.value,{cNome.value = it},label = {Text("Nome Fantasia")})
+                            OutlinedTextField(cCidade.value,{cCidade.value = it},label = {Text("Cidade")})
+                            OutlinedTextField(cBairro.value,{cBairro.value = it},label = {Text("Bairro")})
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = {editState.value = false}) {
+                            Text("Cancelar")
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {eCliente.value.nome=cNome.value;eCliente.value.cidade=cCidade.value;eCliente.value.bairro=cBairro.value;screenModel.editCliente(db,eCliente.value);editState.value = false;navigator.push(EditTabelaScreen(driver,id))}) {
+                            Text("Salvar")
                         }
                     }
                 )
@@ -234,7 +259,7 @@ class EditTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                 .wordBreak(true)
                 .borderColor(JColor.BLACK)
             tabela.addRow(TRow.builder()
-                .add(TextCell.builder().text(entrega.nome+" - "+localDateTime.format(formatter))
+                .add(TextCell.builder().text(entrega.nome.uppercase()+" - "+localDateTime.format(formatter))
                     .horizontalAlignment(HorizontalAlignment.CENTER)
                     .colSpan(5)
                     .fontSize(20)
@@ -264,9 +289,9 @@ class EditTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                 tabela.addRow(TRow.builder()
                     .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
                     .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                    .add(TextCell.builder().text(cliente.nome).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                    .add(TextCell.builder().text(cliente.cidade).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                    .add(TextCell.builder().text(cliente.bairro).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.nome.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.cidade.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.bairro.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
                     .backgroundColor(cor)
                     .build()
                 )
@@ -303,9 +328,9 @@ class EditTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                     tabela2.addRow(TRow.builder()
                         .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
                         .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                        .add(TextCell.builder().text(cliente.nome).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                        .add(TextCell.builder().text(cliente.cidade).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                        .add(TextCell.builder().text(cliente.bairro).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                        .add(TextCell.builder().text(cliente.nome.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                        .add(TextCell.builder().text(cliente.cidade.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                        .add(TextCell.builder().text(cliente.bairro.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
                         .backgroundColor(cor)
                         .build()
                     )

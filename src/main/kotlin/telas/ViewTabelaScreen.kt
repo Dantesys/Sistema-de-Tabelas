@@ -89,7 +89,7 @@ class ViewTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                                 Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
                             }
                         }
-                        Text(entrega.nome+" - "+localDateTime.format(formatter).toString(), style = TextStyle(fontSize = 30.sp))
+                        Text(entrega.nome.uppercase()+" - "+localDateTime.format(formatter).toString(), style = TextStyle(fontSize = 30.sp))
                         IconButton(onClick = {dialogState.value = gerarPDF(entrega)}){
                             Column(horizontalAlignment = Alignment.CenterHorizontally){
                                 Text("Salvar PDF")
@@ -127,15 +127,11 @@ class ViewTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                                         Color.White
                                     }
                                     Row(Modifier.fillMaxWidth().background(cor)){
-                                        if(num<10){
-                                            Text("0$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        }else{
-                                            Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        }
+                                        Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
                                         Text(cliente.codigo.toString(), Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        Text(cliente.nome, Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.cidade, Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.bairro, Modifier.padding(8.dp))
+                                        Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text(cliente.bairro.uppercase(), Modifier.padding(8.dp))
                                     }
                                 }
                             }
@@ -184,7 +180,7 @@ class ViewTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
             .wordBreak(true)
             .borderColor(JColor.BLACK)
         tabela.addRow(TRow.builder()
-            .add(TextCell.builder().text(entrega.nome+" - "+localDateTime.format(formatter))
+            .add(TextCell.builder().text(entrega.nome.uppercase()+" - "+localDateTime.format(formatter))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
                 .colSpan(5)
                 .fontSize(20)
@@ -214,9 +210,9 @@ class ViewTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
             tabela.addRow(TRow.builder()
                 .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
                 .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.nome).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.cidade).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.bairro).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(TextCell.builder().text(cliente.nome.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(TextCell.builder().text(cliente.cidade.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(TextCell.builder().text(cliente.bairro.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
                 .backgroundColor(cor)
                 .build()
             )
@@ -253,9 +249,9 @@ class ViewTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                 tabela2.addRow(TRow.builder()
                     .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
                     .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                    .add(TextCell.builder().text(cliente.nome).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                    .add(TextCell.builder().text(cliente.cidade).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                    .add(TextCell.builder().text(cliente.bairro).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.nome.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.cidade.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.bairro.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
                     .backgroundColor(cor)
                     .build()
                 )
@@ -297,7 +293,7 @@ class ViewTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
             .wordBreak(true)
             .borderColor(JColor.BLACK)
         tabela.addRow(TRow.builder()
-            .add(TextCell.builder().text(entrega.nome+" - "+localDateTime.format(formatter))
+            .add(TextCell.builder().text(entrega.nome.uppercase()+" - "+localDateTime.format(formatter))
                 .horizontalAlignment(HorizontalAlignment.CENTER)
                 .colSpan(5)
                 .fontSize(20)
@@ -327,9 +323,9 @@ class ViewTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
             tabela.addRow(TRow.builder()
                 .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
                 .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.nome).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.cidade).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.bairro).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(TextCell.builder().text(cliente.nome.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(TextCell.builder().text(cliente.cidade.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(TextCell.builder().text(cliente.bairro.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
                 .backgroundColor(cor)
                 .build()
             )
@@ -366,9 +362,9 @@ class ViewTabelaScreen(val driver: SqlDriver, val id:Long) : Screen {
                 tabela2.addRow(TRow.builder()
                     .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
                     .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                    .add(TextCell.builder().text(cliente.nome).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                    .add(TextCell.builder().text(cliente.cidade).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                    .add(TextCell.builder().text(cliente.bairro).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.nome.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.cidade.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                    .add(TextCell.builder().text(cliente.bairro.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
                     .backgroundColor(cor)
                     .build()
                 )

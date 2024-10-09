@@ -8,9 +8,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,8 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.cash.sqldelight.db.SqlDriver
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -74,8 +74,10 @@ class NewTabelaScreen(private val driver: SqlDriver) : Screen {
         val data = remember {mutableStateOf("")}
         val numero = remember {mutableLongStateOf(0)}
         val dialogState = remember {mutableStateOf(false)}
+        val deleteState = remember {mutableStateOf(false)}
         val clientecodigo = remember {mutableLongStateOf(0)}
         val clientes = remember {mutableListOf<Cliente>()}
+        val clienteindex = remember {mutableIntStateOf(0)}
         val focusManager = LocalFocusManager.current
         var showDatePickerDialog by remember {mutableStateOf(false)}
         val datePickerState = rememberDatePickerState()
@@ -109,7 +111,7 @@ class NewTabelaScreen(private val driver: SqlDriver) : Screen {
                 )
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
-                        IconButton(onClick = {imprimir(Entregas(numero.value,nome.value,data.value),screenModel,db,clientes);navigator.popUntilRoot()}){
+                        IconButton(onClick = {dialogState.value = imprimir(Entregas(numero.value,nome.value,data.value),screenModel,db,clientes)}){
                             Icon(imageVector =  Icons.Default.Print,"icone de imprimir")
                         }
                         IconButton(onClick = {dialogState.value = salvar(Entregas(numero.value,nome.value,data.value),screenModel,db,clientes)}){
@@ -132,9 +134,10 @@ class NewTabelaScreen(private val driver: SqlDriver) : Screen {
                             Icon(imageVector =  Icons.Default.PersonAdd,"icone de adicionar")
                         }
                     }
+                    Row{
+                        Text("Quatidade de entregas: "+clientes.size.toString(), style = TextStyle(fontSize = 20.sp))
+                    }
                     Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround,Alignment.CenterVertically){
-                        //TODO
-                        //Cadastro Tabela
                         Box(Modifier.fillMaxSize().padding(50.dp).align(Alignment.CenterVertically)){
                             val stateScroll = rememberLazyListState()
                             LazyColumn(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,state = stateScroll) {
@@ -144,7 +147,8 @@ class NewTabelaScreen(private val driver: SqlDriver) : Screen {
                                         Text("Código", Modifier.fillMaxWidth(0.15f).padding(8.dp))
                                         Text("Nome Fantasia", Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                         Text("Cidade", Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text("Bairro", Modifier.padding(8.dp))
+                                        Text("Bairro", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text("Excluir", Modifier.padding(8.dp))
                                     }
                                 }
                                 var cor: Color
@@ -156,15 +160,16 @@ class NewTabelaScreen(private val driver: SqlDriver) : Screen {
                                         Color.White
                                     }
                                     Row(Modifier.fillMaxWidth().background(cor)){
-                                        if(num<10){
-                                            Text("0$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        }else{
-                                            Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        }
+                                        Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
                                         Text(cliente.codigo.toString(), Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        Text(cliente.nome, Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.cidade, Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.bairro, Modifier.padding(8.dp))
+                                        Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text(cliente.bairro.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        IconButton(onClick = {clienteindex.value = i;deleteState.value = true}){
+                                            Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                                Icon(imageVector =  Icons.Default.Delete,"icone de excluir")
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -179,12 +184,28 @@ class NewTabelaScreen(private val driver: SqlDriver) : Screen {
                 }
             }
             if (dialogState.value) {
-                AlertDialog(onDismissRequest = {dialogState.value = false},
+                AlertDialog(onDismissRequest = {dialogState.value = false;navigator.popUntilRoot()},
                     title = { Text("AVISO") },
                     text = { Text("Tabela Salva com Sucesso") },
                     confirmButton = {
                         Button(onClick = {dialogState.value = false;navigator.popUntilRoot()}) {
                             Text("OK")
+                        }
+                    }
+                )
+            }
+            if (deleteState.value) {
+                AlertDialog(onDismissRequest = {deleteState.value = false},
+                    title = { Text("AVISO") },
+                    text = { Text("Tem certesa de excluir o cliente") },
+                    dismissButton = {
+                        Button(onClick = {deleteState.value = false}) {
+                            Text("Não")
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {deleteState.value = false;clientes.removeAt(clienteindex.value)}) {
+                            Text("Sim")
                         }
                     }
                 )
@@ -204,7 +225,7 @@ class NewTabelaScreen(private val driver: SqlDriver) : Screen {
         screenModel.criarEntrega(db,entrega)
         return true
     }
-    private fun imprimir(entrega: Entregas, screenModel: NewTabelaScreenModel, db: Database, clientes:List<Cliente>){
+    private fun imprimir(entrega: Entregas, screenModel: NewTabelaScreenModel, db: Database, clientes:List<Cliente>):Boolean{
         if(salvar(entrega,screenModel,db,clientes)){
             var limite = 47
             var limiteCont = 50
@@ -228,7 +249,7 @@ class NewTabelaScreen(private val driver: SqlDriver) : Screen {
             tabela.addRow(
                 TRow.builder()
                     .add(TextCell.builder()
-                        .text(entrega.nome+" - "+localDateTime.format(formatter))
+                        .text(entrega.nome.uppercase()+" - "+localDateTime.format(formatter))
                         .horizontalAlignment(HorizontalAlignment.CENTER)
                         .colSpan(5).fontSize(20).build())
                     .build()
@@ -273,13 +294,13 @@ class NewTabelaScreen(private val driver: SqlDriver) : Screen {
                         .add(TextCell.builder().text("${cliente.codigo}")
                             .horizontalAlignment(HorizontalAlignment.CENTER)
                             .borderWidth(1f).build())
-                        .add(TextCell.builder().text(cliente.nome)
+                        .add(TextCell.builder().text(cliente.nome.uppercase())
                             .horizontalAlignment(HorizontalAlignment.CENTER)
                             .borderWidth(1f).build())
-                        .add(TextCell.builder().text(cliente.cidade)
+                        .add(TextCell.builder().text(cliente.cidade.uppercase())
                             .horizontalAlignment(HorizontalAlignment.CENTER)
                             .borderWidth(1f).build())
-                        .add(TextCell.builder().text(cliente.bairro)
+                        .add(TextCell.builder().text(cliente.bairro.uppercase())
                             .horizontalAlignment(HorizontalAlignment.CENTER)
                             .borderWidth(1f).build())
                         .backgroundColor(cor)
@@ -323,13 +344,13 @@ class NewTabelaScreen(private val driver: SqlDriver) : Screen {
                             .add(TextCell.builder().text("${cliente.codigo}")
                                 .horizontalAlignment(HorizontalAlignment.CENTER)
                                 .borderWidth(1f).build())
-                            .add(TextCell.builder().text(cliente.nome)
+                            .add(TextCell.builder().text(cliente.nome.uppercase())
                                 .horizontalAlignment(HorizontalAlignment.CENTER)
                                 .borderWidth(1f).build())
-                            .add(TextCell.builder().text(cliente.cidade)
+                            .add(TextCell.builder().text(cliente.cidade.uppercase())
                                 .horizontalAlignment(HorizontalAlignment.CENTER)
                                 .borderWidth(1f).build())
-                            .add(TextCell.builder().text(cliente.bairro)
+                            .add(TextCell.builder().text(cliente.bairro.uppercase())
                                 .horizontalAlignment(HorizontalAlignment.CENTER)
                                 .borderWidth(1f).build())
                             .backgroundColor(cor)
@@ -357,6 +378,7 @@ class NewTabelaScreen(private val driver: SqlDriver) : Screen {
             }
             document.close()
         }
+        return true
     }
     private fun Long.toBrazilianDateFormat(
         pattern: String = "dd/MM/yyyy"

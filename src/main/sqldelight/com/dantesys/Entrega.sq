@@ -6,12 +6,12 @@ CREATE TABLE IF NOT EXISTS Entrega (
 );
 adicionar:
 INSERT OR REPLACE INTO Entrega (id,nome,data,pedencia) VALUES (:id,:nome,:data,:pedencia);
-contarEntrega:
+contar:
 SELECT count(*) FROM Entrega;
 selectJoin:
-SELECT * FROM Entrega WHERE pedencia=0 ORDER BY data DESC LIMIT 10;
+SELECT * FROM Entrega WHERE pedencia<=0 ORDER BY data DESC LIMIT 5;
 selectJoinP:
-SELECT * FROM Entrega WHERE pedencia=1 ORDER BY data DESC LIMIT 10;
+SELECT * FROM Entrega WHERE pedencia>0 ORDER BY data DESC LIMIT 5;
 selectPGEntrega:
 SELECT * FROM Entrega ORDER BY data DESC LIMIT :limit OFFSET :offset;
 selectEntregaID:
