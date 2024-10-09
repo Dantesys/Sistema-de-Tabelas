@@ -2,7 +2,6 @@ package models
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.dantesys.Database
 import data.Entregas
 import data.dao.EntregasDAO
 import kotlinx.coroutines.*
@@ -12,10 +11,10 @@ class InicioScreenModel : StateScreenModel<InicioScreenModel.State>(State.Loadin
         data object Loading : State()
         data class Result(val entregas: List<Entregas>, val clientes: List<Long>,val pedencias:List<Entregas>,val clientesp: List<Long>) : State()
     }
-    fun getInicio(db:Database){
+    fun getInicio(){
         screenModelScope.launch {
             mutableState.value = State.Loading
-            mutableState.value = State.Result(EntregasDAO.selecionaInicio(db), EntregasDAO.contarClientesInicio(db), EntregasDAO.getPedencias(db),EntregasDAO.contarClientesPendenciaInicio(db))
+            mutableState.value = State.Result(EntregasDAO.selecionaInicio(), EntregasDAO.contarClientesInicio(), EntregasDAO.getPedencias(),EntregasDAO.contarClientesPendenciaInicio())
         }
     }
 }

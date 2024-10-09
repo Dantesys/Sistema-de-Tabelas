@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.cash.sqldelight.db.SqlDriver
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -21,7 +20,6 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.dantesys.Database
 import data.Entregas
 import telas.parts.loadingContent
 import models.InicioScreenModel
@@ -29,34 +27,28 @@ import telas.parts.menu
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-data class InicioScreen(val driver: SqlDriver) : Screen {
+class InicioScreen : Screen {
 
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val db = Database(driver)
         val screenModel = rememberScreenModel { InicioScreenModel() }
         val state by screenModel.state.collectAsState()
         when (val result = state) {
-            is InicioScreenModel.State.Loading -> loadingContent(navigator,false,driver)
+            is InicioScreenModel.State.Loading -> loadingContent(navigator)
             is InicioScreenModel.State.Result -> inicio(result.entregas,result.clientes,result.pedencias,result.clientesp,navigator)
         }
         LaunchedEffect(currentCompositeKeyHash){
-            screenModel.getInicio(db)
+            screenModel.getInicio()
         }
     }
     @Composable
     fun inicio(entregas: List<Entregas>, clientes: List<Long>, pedencias: List<Entregas>,clientesp: List<Long>,navigator: Navigator){
         MaterialTheme {
             Row(Modifier.fillMaxSize()){
-                menu(Modifier.fillMaxWidth(0.2f).fillMaxHeight().background(Color(250,255,196)),
-                    Arrangement.spacedBy(10.dp),
-                    Alignment.CenterHorizontally,
-                    navigator,
-                    driver
-                )
+                menu(Modifier.fillMaxWidth(0.2f).fillMaxHeight().background(Color(250,255,196)),Arrangement.spacedBy(10.dp),Alignment.CenterHorizontally,navigator)
                 Column(Modifier.fillMaxWidth(),Arrangement.SpaceEvenly, horizontalAlignment = Alignment.CenterHorizontally) {
                     if(entregas.isEmpty()){
                         Text("No momento não tem entregas em aberto", style = TextStyle(fontSize = 30.sp))
@@ -78,7 +70,7 @@ data class InicioScreen(val driver: SqlDriver) : Screen {
                                 Text(entrega.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(localDateTime.format(formatter).toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(qtd.toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                IconButton(onClick = {navigator.push(ViewTabelaScreen(driver,entrega.id))}){
+                                IconButton(onClick = {navigator.push(ViewTabelaScreen(entrega.id))}){
                                     Icon(imageVector =  Icons.Default.Search,"icone de informação")
                                 }
                             }
@@ -102,7 +94,7 @@ data class InicioScreen(val driver: SqlDriver) : Screen {
                                 Text(entrega.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(localDateTime.format(formatter).toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                 Text(qtd.toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                IconButton(onClick = {navigator.push(ViewTabelaScreen(driver,entrega.id))}){
+                                IconButton(onClick = {navigator.push(ViewTabelaScreen(entrega.id))}){
                                     Icon(imageVector =  Icons.Default.Search,"icone de informação")
                                 }
                             }

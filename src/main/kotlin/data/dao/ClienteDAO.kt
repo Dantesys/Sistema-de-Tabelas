@@ -2,10 +2,12 @@ package data.dao
 
 import com.dantesys.Database
 import data.Cliente
+import util.getDB
 
 class ClienteDAO {
     companion object {
-        fun addFast(db:Database,codigo:Long):Cliente{
+        val db:Database = getDB()
+        fun addFast(codigo:Long):Cliente{
             val clienteQueries = db.clienteQueries
             val cliente = clienteQueries.selectClienteCodigo(codigo).executeAsOneOrNull()
             if(cliente == null){
@@ -18,7 +20,7 @@ class ClienteDAO {
             clienteNovo.bairro = cliente.bairro?: ""
             return clienteNovo
         }
-        fun edit(db: Database,cliente: Cliente){
+        fun edit(cliente: Cliente){
             val clienteQueries = db.clienteQueries
             clienteQueries.insertComplet(cliente.codigo,cliente.nome,cliente.cidade,cliente.bairro)
         }

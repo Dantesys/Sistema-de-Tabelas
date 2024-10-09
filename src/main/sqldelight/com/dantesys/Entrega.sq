@@ -17,6 +17,11 @@ SELECT * FROM Entrega ORDER BY data DESC LIMIT :limit OFFSET :offset;
 selectEntregaID:
 SELECT * FROM Entrega
 WHERE Entrega.id = :id;
+selectPGEntregaFiltroNome:
+SELECT * FROM Entrega
+WHERE (nome LIKE (:nome || "%") OR ("%" || :nome))
+ORDER BY data DESC
+LIMIT :limit OFFSET :offset;
 selectFiltroNDEntrega:
 SELECT * FROM Entrega
 WHERE (nome LIKE (:nome || "%") OR ("%" || :nome)) AND (data BETWEEN :datai AND :dataf)

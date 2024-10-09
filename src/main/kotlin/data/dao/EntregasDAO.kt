@@ -5,28 +5,30 @@ import com.dantesys.EntregaClienteQueries
 import com.dantesys.EntregaQueries
 import data.Cliente
 import data.Entregas
+import util.getDB
 
 class EntregasDAO{
     companion object {
-        fun selecionaInicio(db: Database):List<Entregas>{
+        val db:Database = getDB()
+        fun selecionaInicio():List<Entregas>{
             val entregaQueries: EntregaQueries = db.entregaQueries
             val entregas = entregaQueries.selectJoin().executeAsList()
             return entregas.map { e ->
                 Entregas(e.id,e.nome,e.data_, e.pedencia == 1L)
             }
         }
-        fun entregasByCliente(db:Database,codigo:Long):List<Entregas>{
+        fun entregasByCliente(codigo:Long):List<Entregas>{
             val entregaClienteQueries = db.entregaClienteQueries
             val dbEntrega = entregaClienteQueries.selecionarEntregasbyCliente(codigo).executeAsList()
             return dbEntrega.map { e ->
-                selecionaEntrega(db,e.entregaID)
+                selecionaEntrega(e.entregaID)
             }
         }
-        fun removeAll(db:Database,entregas: Entregas){
+        fun removeAll(entregas: Entregas){
             val entregaClienteQueries = db.entregaClienteQueries
             entregaClienteQueries.removerEntrega(entregas.id)
         }
-        fun atualizarPedencia(db:Database,entrega:Entregas){
+        fun atualizarPedencia(entrega:Entregas){
             var pedencia = entrega.clientes.size
             entrega.clientes.map { c ->
                 if(c.nome != "" && c.cidade != "" && c.bairro != ""){
@@ -36,13 +38,23 @@ class EntregasDAO{
             val entregaQueries = db.entregaQueries
             entregaQueries.adicionar(entrega.id,entrega.nome,entrega.data,pedencia.toLong())
         }
-        fun adicionar(db:Database, entregas: Entregas){
+        fun selecionaEntregaPG(limit:Long,pagina:Long,fid:Long,fnome:String,fdata:String,fpendencia:Int):List<Entregas>{
+            val offset = limit*pagina
+            val entregaQueries = db.entregaQueries
+            val entregas = mutableListOf<Entregas>()
+            val entregasPG = entregaQueries.selectPGEntrega(limit,offset).executeAsList()
+            entregasPG.map { e ->
+                entregas.add(Entregas(e.id,e.nome,e.data_,e.pedencia>0))
+            }
+            return entregas
+        }
+        fun adicionar(entregas: Entregas){
             val entregaQueries = db.entregaQueries
             var pedencia = entregas.clientes.size
             var pos:Long = 1
             entregaQueries.adicionar(entregas.id,entregas.nome,entregas.data,1)
             entregas.clientes.map { c ->
-                adicionarCliente(db,c.codigo,entregas.id,pos)
+                adicionarCliente(c.codigo,entregas.id,pos)
                 pos++
                 if(c.nome!="" && c.cidade!="" && c.bairro!=""){
                     pedencia--
@@ -50,18 +62,18 @@ class EntregasDAO{
             }
             entregaQueries.adicionar(entregas.id,entregas.nome,entregas.data,pedencia.toLong())
         }
-        private fun adicionarCliente(db:Database,clienteID:Long,entregaID:Long,posicao:Long){
+        private fun adicionarCliente(clienteID:Long,entregaID:Long,posicao:Long){
             val entregaClienteQueries = db.entregaClienteQueries
             entregaClienteQueries.adicionar(clienteID,posicao,entregaID)
         }
-        fun getPedencias(db:Database):List<Entregas>{
+        fun getPedencias():List<Entregas>{
             val entregaQueries: EntregaQueries = db.entregaQueries
             val entregas = entregaQueries.selectJoinP().executeAsList()
             return entregas.map { e ->
                 Entregas(e.id,e.nome,e.data_,e.pedencia > 0L)
             }
         }
-        fun contarClientesPendenciaInicio(db:Database):List<Long>{
+        fun contarClientesPendenciaInicio():List<Long>{
             val entregaQueries: EntregaQueries = db.entregaQueries
             val entregaClienteQueries: EntregaClienteQueries = db.entregaClienteQueries
             val entregas = entregaQueries.selectJoinP().executeAsList()
@@ -71,7 +83,7 @@ class EntregasDAO{
             }
             return contados
         }
-        fun contarClientesInicio(db:Database):List<Long>{
+        fun contarClientesInicio():List<Long>{
             val entregaQueries: EntregaQueries = db.entregaQueries
             val entregaClienteQueries: EntregaClienteQueries = db.entregaClienteQueries
             val entregas = entregaQueries.selectJoin().executeAsList()
@@ -81,7 +93,7 @@ class EntregasDAO{
             }
             return contados
         }
-        fun selecionaEntrega(db:Database,id:Long):Entregas{
+        fun selecionaEntrega(id:Long):Entregas{
             val entregaQueries: EntregaQueries = db.entregaQueries
             val entregaClienteQueries: EntregaClienteQueries = db.entregaClienteQueries
             val entrega = entregaQueries.selectEntregaID(id).executeAsOne()

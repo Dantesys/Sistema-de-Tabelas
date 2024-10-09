@@ -9,15 +9,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import app.cash.sqldelight.db.SqlDriver
 import cafe.adriel.voyager.navigator.Navigator
 import com.dantesys.sistemadetabelas.generated.resources.Res
 import com.dantesys.sistemadetabelas.generated.resources.logo
 import org.jetbrains.compose.resources.imageResource
+import telas.ListTabelaScreen
 import telas.NewTabelaScreen
 
 @Composable
-fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment.Horizontal,navigator: Navigator,driver: SqlDriver,inicio:Boolean=true,ntabela:Boolean=false,vtabela:Boolean=false,ncliente:Boolean=false,vcliente:Boolean=false){
+fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment.Horizontal,navigator: Navigator,inicio:Boolean=true,ntabela:Boolean=false,vtabela:Boolean=false,ncliente:Boolean=false,vcliente:Boolean=false){
     Column(
         modifier,
         arrangement,
@@ -45,12 +45,12 @@ fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment
             }
         }
         if(!ntabela){
-            Button(onClick = {navigator.push(NewTabelaScreen(driver))}, Modifier.fillMaxWidth(0.9f)){
+            Button(onClick = {navigator.push(NewTabelaScreen())}, Modifier.fillMaxWidth(0.9f)){
                 Text("Nova Tabela")
             }
         }
         if(!vtabela){
-            Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
+            Button(onClick = {navigator.push(ListTabelaScreen())}, Modifier.fillMaxWidth(0.9f)){
                 Text("Ver Tabelas")
             }
         }

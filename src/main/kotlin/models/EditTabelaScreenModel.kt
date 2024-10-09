@@ -2,7 +2,6 @@ package models
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.dantesys.Database
 import data.Cliente
 import data.Entregas
 import data.dao.ClienteDAO
@@ -14,21 +13,21 @@ class EditTabelaScreenModel : StateScreenModel<EditTabelaScreenModel.State>(Stat
         data object Loading : State()
         data class Result(val entrega: Entregas) : State()
     }
-    fun getClientes(db:Database,id:Long){
+    fun getClientes(id:Long){
         screenModelScope.launch {
             mutableState.value = State.Loading
-            mutableState.value = State.Result(EntregasDAO.selecionaEntrega(db,id))
+            mutableState.value = State.Result(EntregasDAO.selecionaEntrega(id))
         }
     }
-    fun editCliente(db: Database,cliente:Cliente){
-        ClienteDAO.edit(db,cliente)
-        val entregas = EntregasDAO.entregasByCliente(db,cliente.codigo)
+    fun editCliente(cliente:Cliente){
+        ClienteDAO.edit(cliente)
+        val entregas = EntregasDAO.entregasByCliente(cliente.codigo)
         entregas.map { e ->
-            EntregasDAO.atualizarPedencia(db,e)
+            EntregasDAO.atualizarPedencia(e)
         }
     }
-    fun criarEntrega(db:Database,entrega:Entregas){
-        EntregasDAO.removeAll(db,entrega)
-        EntregasDAO.adicionar(db,entrega)
+    fun criarEntrega(entrega:Entregas){
+        EntregasDAO.removeAll(entrega)
+        EntregasDAO.adicionar(entrega)
     }
 }

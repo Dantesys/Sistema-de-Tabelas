@@ -8,13 +8,12 @@ import com.dantesys.sistemadetabelas.generated.resources.Res
 import com.dantesys.sistemadetabelas.generated.resources.logo
 import org.jetbrains.compose.resources.painterResource
 import telas.InicioScreen
+import util.getDriver
 import java.util.*
 
 fun main() = application {
-    val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:sistema.db",
-        properties = Properties().apply { put("foreign_keys", "true")})
-    Database.Schema.create(driver)
+    Database.Schema.create(getDriver())
     Window(onCloseRequest = ::exitApplication,title = "Sistema de Tabelas", icon = painterResource(Res.drawable.logo)) {
-        Navigator(InicioScreen(driver))
+        Navigator(InicioScreen())
     }
 }
