@@ -33,6 +33,8 @@ dependencies {
     implementation(compose.components.resources)
     implementation(compose.components.uiToolingPreview)
     implementation(compose.materialIconsExtended)
+    implementation("androidx.paging:paging-runtime:3.3.2")
+    implementation("androidx.paging:paging-compose:3.3.2")
     implementation("app.cash.sqldelight:sqlite-driver:2.0.2")
     implementation("app.cash.sqldelight:androidx-paging3-extensions:2.0.2")
     implementation("app.cash.sqldelight:coroutines-extensions:2.0.2")

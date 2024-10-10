@@ -1,10 +1,14 @@
 package data.dao
 
+import app.cash.paging.PagingSource
+import app.cash.sqldelight.paging3.QueryPagingSource
 import com.dantesys.Database
+import com.dantesys.Entrega
 import com.dantesys.EntregaClienteQueries
 import com.dantesys.EntregaQueries
 import data.Cliente
 import data.Entregas
+import kotlinx.coroutines.Dispatchers
 import util.getDB
 
 class EntregasDAO{
@@ -38,15 +42,17 @@ class EntregasDAO{
             val entregaQueries = db.entregaQueries
             entregaQueries.adicionar(entrega.id,entrega.nome,entrega.data,pedencia.toLong())
         }
-        fun selecionaEntregaPG(limit:Long,pagina:Long,fid:Long,fnome:String,fdata:String,fpendencia:Int):List<Entregas>{
-            val offset = limit*pagina
+        fun selecionaEntregaPG(filtro:String,fId:Int,fNome:Int,fData:Int,fDatai:String,fDataf:String,fPedencia:Int): PagingSource<Int, Entrega> {
             val entregaQueries = db.entregaQueries
-            val entregas = mutableListOf<Entregas>()
-            val entregasPG = entregaQueries.selectPGEntrega(limit,offset).executeAsList()
-            entregasPG.map { e ->
-                entregas.add(Entregas(e.id,e.nome,e.data_,e.pedencia>0))
-            }
-            return entregas
+            val pagingSource = QueryPagingSource(
+                countQuery = entregaQueries.contarFiltro(filtro,fId,fNome,fData,fDatai,fDataf,fPedencia),
+                transacter = entregaQueries,
+                context = Dispatchers.IO,
+                queryProvider = { limit,offset ->
+                    entregaQueries.selectPGEntregaFiltro(filtro,fId,fNome,fData,fDatai,fDataf,fPedencia,limit,offset)
+                }
+            )
+            return pagingSource
         }
         fun adicionar(entregas: Entregas){
             val entregaQueries = db.entregaQueries
