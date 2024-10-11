@@ -1,4 +1,4 @@
-package data
+package repository.data
 
 data class Cliente(
     val codigo:Long,

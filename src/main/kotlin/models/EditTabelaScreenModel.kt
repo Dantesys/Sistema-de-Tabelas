@@ -2,10 +2,10 @@ package models
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import data.Cliente
-import data.Entregas
-import data.dao.ClienteDAO
-import data.dao.EntregasDAO
+import repository.data.Cliente
+import repository.data.Entregas
+import repository.dao.ClienteDAO
+import repository.dao.EntregasDAO
 import kotlinx.coroutines.launch
 
 class EditTabelaScreenModel : StateScreenModel<EditTabelaScreenModel.State>(State.Loading) {
@@ -19,14 +19,14 @@ class EditTabelaScreenModel : StateScreenModel<EditTabelaScreenModel.State>(Stat
             mutableState.value = State.Result(EntregasDAO.selecionaEntrega(id))
         }
     }
-    fun editCliente(cliente:Cliente){
+    fun editCliente(cliente: Cliente){
         ClienteDAO.edit(cliente)
         val entregas = EntregasDAO.entregasByCliente(cliente.codigo)
         entregas.map { e ->
             EntregasDAO.atualizarPedencia(e)
         }
     }
-    fun criarEntrega(entrega:Entregas){
+    fun criarEntrega(entrega: Entregas){
         EntregasDAO.removeAll(entrega)
         EntregasDAO.adicionar(entrega)
     }

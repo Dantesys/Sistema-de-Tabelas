@@ -30,8 +30,8 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import data.Cliente
-import data.Entregas
+import repository.data.Cliente
+import repository.data.Entregas
 import models.EditTabelaScreenModel
 import telas.parts.loadingContent
 import telas.parts.menu
@@ -58,7 +58,7 @@ class EditTabelaScreen(val id:Long) : Screen {
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun edittabelaScreen(entrega: Entregas,navigator: Navigator,screenModel:EditTabelaScreenModel) {
+    fun edittabelaScreen(entrega: Entregas, navigator: Navigator, screenModel:EditTabelaScreenModel) {
         val dialogState = remember { mutableStateOf(false) }
         val editState = remember { mutableStateOf(false) }
         val cNome = remember { mutableStateOf("") }
@@ -213,11 +213,11 @@ class EditTabelaScreen(val id:Long) : Screen {
             }
         }
     }
-    private fun salvar(entrega: Entregas,screenModel: EditTabelaScreenModel):Boolean{
+    private fun salvar(entrega: Entregas, screenModel: EditTabelaScreenModel):Boolean{
         screenModel.criarEntrega(entrega)
         return true
     }
-    private fun imprimirSave(entrega:Entregas,screenModel: EditTabelaScreenModel):Boolean{
+    private fun imprimirSave(entrega: Entregas, screenModel: EditTabelaScreenModel):Boolean{
         if(salvar(entrega,screenModel)){
             imprimir(entrega)
         }

@@ -2,8 +2,8 @@ package models
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import data.Entregas
-import data.dao.EntregasDAO
+import repository.data.Entregas
+import repository.dao.EntregasDAO
 import kotlinx.coroutines.launch
 
 class ViewTabelaScreenModel : StateScreenModel<ViewTabelaScreenModel.State>(State.Loading) {

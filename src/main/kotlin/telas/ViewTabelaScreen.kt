@@ -24,7 +24,7 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import data.Entregas
+import repository.data.Entregas
 import telas.parts.loadingContent
 import models.ViewTabelaScreenModel
 import telas.parts.menu
@@ -50,7 +50,7 @@ class ViewTabelaScreen(val id:Long) : Screen {
         }
     }
     @Composable
-    fun vertabelaScreen(entrega: Entregas,navigator: Navigator) {
+    fun vertabelaScreen(entrega: Entregas, navigator: Navigator) {
         val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
         val localDateTime = LocalDate.parse(entrega.data)
         val dialogState = remember { mutableStateOf(false) }

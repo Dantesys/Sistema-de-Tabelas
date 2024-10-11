@@ -20,7 +20,7 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import data.Entregas
+import repository.data.Entregas
 import telas.parts.loadingContent
 import models.InicioScreenModel
 import telas.parts.menu
@@ -45,7 +45,7 @@ class InicioScreen : Screen {
         }
     }
     @Composable
-    fun inicio(entregas: List<Entregas>, clientes: List<Long>, pedencias: List<Entregas>,clientesp: List<Long>,navigator: Navigator){
+    fun inicio(entregas: List<Entregas>, clientes: List<Long>, pedencias: List<Entregas>, clientesp: List<Long>, navigator: Navigator){
         MaterialTheme {
             Row(Modifier.fillMaxSize()){
                 menu(Modifier.fillMaxWidth(0.2f).fillMaxHeight().background(Color(250,255,196)),Arrangement.spacedBy(10.dp),Alignment.CenterHorizontally,navigator)

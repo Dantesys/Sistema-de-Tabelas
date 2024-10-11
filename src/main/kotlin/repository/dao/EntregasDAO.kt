@@ -1,4 +1,4 @@
-package data.dao
+package repository.dao
 
 import app.cash.paging.PagingSource
 import app.cash.sqldelight.paging3.QueryPagingSource
@@ -6,10 +6,10 @@ import com.dantesys.Database
 import com.dantesys.Entrega
 import com.dantesys.EntregaClienteQueries
 import com.dantesys.EntregaQueries
-import data.Cliente
-import data.Entregas
+import repository.data.Cliente
+import repository.data.Entregas
 import kotlinx.coroutines.Dispatchers
-import util.getDB
+import repository.getDB
 
 class EntregasDAO{
     companion object {
@@ -32,7 +32,7 @@ class EntregasDAO{
             val entregaClienteQueries = db.entregaClienteQueries
             entregaClienteQueries.removerEntrega(entregas.id)
         }
-        fun atualizarPedencia(entrega:Entregas){
+        fun atualizarPedencia(entrega: Entregas){
             var pedencia = entrega.clientes.size
             entrega.clientes.map { c ->
                 if(c.nome != "" && c.cidade != "" && c.bairro != ""){
@@ -42,7 +42,7 @@ class EntregasDAO{
             val entregaQueries = db.entregaQueries
             entregaQueries.adicionar(entrega.id,entrega.nome,entrega.data,pedencia.toLong())
         }
-        fun selecionaEntregaPG(filtro:String,fId:Int,fNome:Int,fData:Int,fDatai:String,fDataf:String,fPedencia:Int): PagingSource<Int, Entrega> {
+        fun selecionaEntregaPG(filtro:String,fId:Long,fNome:Long,fData:Long,fDatai:String,fDataf:String,fPedencia:Long): PagingSource<Int, Entrega> {
             val entregaQueries = db.entregaQueries
             val pagingSource = QueryPagingSource(
                 countQuery = entregaQueries.contarFiltro(filtro,fId,fNome,fData,fDatai,fDataf,fPedencia),
@@ -99,7 +99,7 @@ class EntregasDAO{
             }
             return contados
         }
-        fun selecionaEntrega(id:Long):Entregas{
+        fun selecionaEntrega(id:Long): Entregas {
             val entregaQueries: EntregaQueries = db.entregaQueries
             val entregaClienteQueries: EntregaClienteQueries = db.entregaClienteQueries
             val entrega = entregaQueries.selectEntregaID(id).executeAsOne()

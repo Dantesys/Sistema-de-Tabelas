@@ -1,13 +1,13 @@
-package data.dao
+package repository.dao
 
 import com.dantesys.Database
-import data.Cliente
-import util.getDB
+import repository.data.Cliente
+import repository.getDB
 
 class ClienteDAO {
     companion object {
         val db:Database = getDB()
-        fun addFast(codigo:Long):Cliente{
+        fun addFast(codigo:Long): Cliente {
             val clienteQueries = db.clienteQueries
             val cliente = clienteQueries.selectClienteCodigo(codigo).executeAsOneOrNull()
             if(cliente == null){

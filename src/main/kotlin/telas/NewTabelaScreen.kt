@@ -30,15 +30,14 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import data.Cliente
-import data.Entregas
+import repository.data.Cliente
+import repository.data.Entregas
 import models.NewTabelaScreenModel
 import telas.parts.menu
 import util.imprimir
 import util.toBrazilianDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 class NewTabelaScreen() : Screen {
 
@@ -193,7 +192,7 @@ class NewTabelaScreen() : Screen {
             }
         }
     }
-    private fun adicionarCliente(id:Long, screenModel:NewTabelaScreenModel):Cliente{
+    private fun adicionarCliente(id:Long, screenModel:NewTabelaScreenModel): Cliente {
         return screenModel.addCliente(id)
     }
     private fun salvar(entrega: Entregas, screenModel: NewTabelaScreenModel, clientes:List<Cliente>):Boolean{

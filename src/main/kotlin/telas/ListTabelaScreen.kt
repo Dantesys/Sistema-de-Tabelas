@@ -1,9 +1,7 @@
 package telas
 
 import androidx.compose.runtime.*
-import androidx.paging.PagingSource
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
+import androidx.paging.PagingData
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -21,16 +19,16 @@ class ListTabelaScreen:Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = rememberScreenModel { ListTabelaScreenModel() }
         val state by screenModel.state.collectAsState()
-        val pgs:PagingSource<Int,Entrega>
-        val load = remember { mutableStateOf(false) }
         when (val result = state) {
             is ListTabelaScreenModel.State.Loading -> loadingContent(navigator)
-            is ListTabelaScreenModel.State.Result -> {pgs=result.entregas;load.value=true}
+            is ListTabelaScreenModel.State.Result -> list(result.entregas)
         }
         LaunchedEffect(currentCompositeKeyHash){
             screenModel.getEntregas()
         }
-        if(load.value){
-        }
+
+    }
+    fun list(pg:MutableList<PagingData<Entrega>>){
+        println(pg.size)
     }
 }

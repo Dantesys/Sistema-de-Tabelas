@@ -1,9 +1,6 @@
 package util
 
-import data.Cliente
-import data.Entregas
-import models.EditTabelaScreenModel
-import models.NewTabelaScreenModel
+import repository.data.Entregas
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
@@ -149,7 +146,7 @@ fun imprimir(entrega: Entregas){
     }
     document.close()
 }
-fun gerarPDF(entrega:Entregas):Boolean{
+fun gerarPDF(entrega: Entregas):Boolean{
     File("./tabelas").mkdir()
     var limite = 47
     var limiteCont = 50

@@ -1,17 +1,17 @@
 package models
 
 import cafe.adriel.voyager.core.model.ScreenModel
-import data.Cliente
-import data.Entregas
-import data.dao.ClienteDAO
-import data.dao.EntregasDAO
+import repository.data.Cliente
+import repository.data.Entregas
+import repository.dao.ClienteDAO
+import repository.dao.EntregasDAO
 
 class NewTabelaScreenModel : ScreenModel {
-    fun addCliente(codigo: Long):Cliente{
+    fun addCliente(codigo: Long): Cliente {
         val cliente = ClienteDAO.addFast(codigo)
         return cliente
     }
-    fun criarEntrega(entrega:Entregas){
+    fun criarEntrega(entrega: Entregas){
         EntregasDAO.adicionar(entrega)
     }
 }
