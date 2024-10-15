@@ -2,19 +2,21 @@ package models
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import repository.data.Entregas
-import repository.dao.EntregasDAO
+import com.dantesys.Cliente
+import com.dantesys.Entrega
 import kotlinx.coroutines.launch
+import repository.Repository
 
 class ViewTabelaScreenModel : StateScreenModel<ViewTabelaScreenModel.State>(State.Loading) {
     sealed class State {
         data object Loading : State()
-        data class Result(val entrega: Entregas) : State()
+        data class Result(val entrega: Entrega, val clientes:List<Cliente>) : State()
     }
     fun getClientes(id:Long){
         screenModelScope.launch {
             mutableState.value = State.Loading
-            mutableState.value = State.Result(EntregasDAO.selecionaEntrega(id))
+            val resultado = Repository.getView(id)
+            mutableState.value = State.Result(resultado.entrega,resultado.clientes)
         }
     }
 }

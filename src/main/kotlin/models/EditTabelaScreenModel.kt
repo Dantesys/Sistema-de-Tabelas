@@ -2,32 +2,40 @@ package models
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import repository.data.Cliente
-import repository.data.Entregas
+import com.dantesys.Cliente
+import com.dantesys.Entrega
 import repository.dao.ClienteDAO
-import repository.dao.EntregasDAO
+import repository.dao.EntregaDAO
 import kotlinx.coroutines.launch
+import repository.Repository
 
 class EditTabelaScreenModel : StateScreenModel<EditTabelaScreenModel.State>(State.Loading) {
     sealed class State {
         data object Loading : State()
-        data class Result(val entrega: Entregas) : State()
+        data class Result(val entrega: Entrega,val clientes: List<Cliente>) : State()
     }
     fun getClientes(id:Long){
         screenModelScope.launch {
             mutableState.value = State.Loading
-            mutableState.value = State.Result(EntregasDAO.selecionaEntrega(id))
+            val resultado = Repository.getView(id)
+            mutableState.value = State.Result(resultado.entrega,resultado.clientes)
         }
     }
-    fun editCliente(cliente: Cliente){
-        ClienteDAO.edit(cliente)
-        val entregas = EntregasDAO.entregasByCliente(cliente.codigo)
-        entregas.map { e ->
-            EntregasDAO.atualizarPedencia(e)
+    fun editCliente(cliente: Cliente,id:Long){
+        screenModelScope.launch {
+            mutableState.value = State.Loading
+            Repository.editCliente(cliente)
+            Repository.attPedencia(cliente.codigo)
+            val resultado = Repository.getView(id)
+            mutableState.value = State.Result(resultado.entrega,resultado.clientes)
         }
     }
-    fun criarEntrega(entrega: Entregas){
-        EntregasDAO.removeAll(entrega)
-        EntregasDAO.adicionar(entrega)
+    fun editEntrega(entrega: Entrega,clientes:List<Cliente>){
+        screenModelScope.launch {
+            mutableState.value = State.Loading
+            Repository.editEntrega(entrega, clientes)
+            val resultado = Repository.getView(entrega.id)
+            mutableState.value = State.Result(resultado.entrega,resultado.clientes)
+        }
     }
 }

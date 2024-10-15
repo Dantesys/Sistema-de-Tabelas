@@ -1,6 +1,7 @@
 package util
 
-import repository.data.Entregas
+import com.dantesys.Cliente
+import com.dantesys.Entrega
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
@@ -23,12 +24,12 @@ import java.util.*
 import javax.print.attribute.HashPrintRequestAttributeSet
 import javax.print.attribute.standard.Sides
 
-fun imprimir(entrega: Entregas){
+fun imprimir(entrega: Entrega, clientes:List<Cliente>){
     var limite = 47
     var limiteCont = 50
     var resto = 0
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    val localDateTime = LocalDate.parse(entrega.data)
+    val localDateTime = LocalDate.parse(entrega.data_)
     val document = PDDocument()
     val info = document.documentInformation
     info.title = entrega.nome
@@ -63,13 +64,13 @@ fun imprimir(entrega: Entregas){
         .build()
     )
     var num = 1
-    if(entrega.clientes.size<limite){
-        limite = entrega.clientes.size
+    if(clientes.size<limite){
+        limite = clientes.size
     }else{
-        resto = entrega.clientes.size-limite
+        resto = clientes.size-limite
     }
     while(num<limite){
-        val cliente = entrega.clientes[num-1]
+        val cliente = clientes[num-1]
         var cor = Color.WHITE
         if(num%2==1){
             cor = Color.LIGHT_GRAY
@@ -78,9 +79,9 @@ fun imprimir(entrega: Entregas){
             Row.builder()
             .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
             .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-            .add(TextCell.builder().text(cliente.nome.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-            .add(TextCell.builder().text(cliente.cidade.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-            .add(TextCell.builder().text(cliente.bairro.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+            .add(cliente.nome?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
+            .add(cliente.cidade?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
+            .add(cliente.bairro?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
             .backgroundColor(cor)
             .build()
         )
@@ -109,7 +110,7 @@ fun imprimir(entrega: Entregas){
             .wordBreak(true)
             .borderColor(Color.BLACK)
         while(cont<limiteCont){
-            val cliente = entrega.clientes[num-1]
+            val cliente = clientes[num-1]
             var cor = Color.WHITE
             if(num%2==1){
                 cor = Color.LIGHT_GRAY
@@ -118,9 +119,9 @@ fun imprimir(entrega: Entregas){
                 Row.builder()
                 .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
                 .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.nome.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.cidade.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.bairro.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(cliente.nome?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
+                .add(cliente.cidade?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
+                .add(cliente.bairro?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
                 .backgroundColor(cor)
                 .build()
             )
@@ -146,13 +147,13 @@ fun imprimir(entrega: Entregas){
     }
     document.close()
 }
-fun gerarPDF(entrega: Entregas):Boolean{
+fun gerarPDF(entrega: Entrega,clientes:List<Cliente>):Boolean{
     File("./tabelas").mkdir()
     var limite = 47
     var limiteCont = 50
     var resto = 0
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    val localDateTime = LocalDate.parse(entrega.data)
+    val localDateTime = LocalDate.parse(entrega.data_)
     val document = PDDocument()
     val info = document.documentInformation
     info.title = entrega.nome
@@ -186,13 +187,13 @@ fun gerarPDF(entrega: Entregas):Boolean{
         .build()
     )
     var num = 1
-    if(entrega.clientes.size<limite){
-        limite = entrega.clientes.size
+    if(clientes.size<limite){
+        limite = clientes.size
     }else{
-        resto = entrega.clientes.size-limite
+        resto = clientes.size-limite
     }
     while(num<limite){
-        val cliente = entrega.clientes[num-1]
+        val cliente = clientes[num-1]
         var cor = Color.WHITE
         if(num%2==1){
             cor = Color.LIGHT_GRAY
@@ -201,9 +202,9 @@ fun gerarPDF(entrega: Entregas):Boolean{
             Row.builder()
             .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
             .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-            .add(TextCell.builder().text(cliente.nome.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-            .add(TextCell.builder().text(cliente.cidade.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-            .add(TextCell.builder().text(cliente.bairro.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+            .add(cliente.nome?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
+            .add(cliente.cidade?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
+            .add(cliente.bairro?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
             .backgroundColor(cor)
             .build()
         )
@@ -232,7 +233,7 @@ fun gerarPDF(entrega: Entregas):Boolean{
             .wordBreak(true)
             .borderColor(Color.BLACK)
         while(cont<limiteCont){
-            val cliente = entrega.clientes[num-1]
+            val cliente = clientes[num-1]
             var cor = Color.WHITE
             if(num%2==1){
                 cor = Color.LIGHT_GRAY
@@ -241,9 +242,9 @@ fun gerarPDF(entrega: Entregas):Boolean{
                 Row.builder()
                 .add(TextCell.builder().text("$num°").horizontalAlignment(HorizontalAlignment.LEFT).borderWidth(1f).build())
                 .add(TextCell.builder().text("${cliente.codigo}").horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.nome.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.cidade.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
-                .add(TextCell.builder().text(cliente.bairro.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build())
+                .add(cliente.nome?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
+                .add(cliente.cidade?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
+                .add(cliente.bairro?.let { TextCell.builder().text(it.uppercase()).horizontalAlignment(HorizontalAlignment.CENTER).borderWidth(1f).build() })
                 .backgroundColor(cor)
                 .build()
             )
@@ -260,13 +261,11 @@ fun gerarPDF(entrega: Entregas):Boolean{
         conteudo2.close()
         resto -= limiteCont
     }
-    document.save("./tabelas/"+entrega.nome+"-"+entrega.data+".pdf")
+    document.save("./tabelas/"+entrega.nome+"-"+entrega.data_+".pdf")
     document.close()
     return true
 }
-fun Long.toBrazilianDateFormat(
-    pattern: String = "dd/MM/yyyy"
-): String {
+fun Long.toBrazilianDateFormat(pattern: String = "dd/MM/yyyy"):String {
     val date = Date(this)
     val formatter = SimpleDateFormat(pattern).apply {
         timeZone = TimeZone.getTimeZone("GMT")

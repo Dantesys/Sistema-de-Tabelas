@@ -1,0 +1,17 @@
+CREATE TABLE IF NOT EXISTS Pedido (
+    clienteID INTEGER NOT NULL,
+    posicao INTEGER NOT NULL,
+    entregaID INTEGER NOT NULL,
+    FOREIGN KEY(clienteID) REFERENCES Cliente(codigo),
+    FOREIGN KEY(entregaID) REFERENCES Entrega(id)
+);
+removerEntrega:
+DELETE FROM Pedido WHERE entregaID=:entregaID;
+adicionar:
+INSERT OR REPLACE INTO Pedido (clienteID,posicao,entregaID) VALUES (:cliente,:posicao,:entrega);
+contarEntregaCliente:
+SELECT count(*) FROM Pedido WHERE entregaID = :id;
+selecionarClientesbyEntrega:
+SELECT * FROM Pedido WHERE entregaID = :id ORDER BY posicao ASC;
+selecionarEntregasbyCliente:
+SELECT * FROM Pedido WHERE clienteID = :id;

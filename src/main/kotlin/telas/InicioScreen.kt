@@ -20,7 +20,7 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import repository.data.Entregas
+import com.dantesys.Entrega
 import telas.parts.loadingContent
 import models.InicioScreenModel
 import telas.parts.menu
@@ -45,7 +45,7 @@ class InicioScreen : Screen {
         }
     }
     @Composable
-    fun inicio(entregas: List<Entregas>, clientes: List<Long>, pedencias: List<Entregas>, clientesp: List<Long>, navigator: Navigator){
+    fun inicio(entregas: List<Entrega>, clientes: List<Long>, pedencias: List<Entrega>, clientesp: List<Long>, navigator: Navigator){
         MaterialTheme {
             Row(Modifier.fillMaxSize()){
                 menu(Modifier.fillMaxWidth(0.2f).fillMaxHeight().background(Color(250,255,196)),Arrangement.spacedBy(10.dp),Alignment.CenterHorizontally,navigator)
@@ -63,7 +63,7 @@ class InicioScreen : Screen {
                         }
                         for (entrega in entregas){
                             val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                            val localDateTime = LocalDate.parse(entrega.data)
+                            val localDateTime = LocalDate.parse(entrega.data_)
                             val qtd = clientes[entregas.indexOf(entrega)]
                             Row(Modifier.fillMaxWidth(0.75f).border(1.dp, Color.Black), Arrangement.SpaceAround){
                                 Text(entrega.id.toString(), Modifier.fillMaxWidth(0.1f).padding(8.dp))
@@ -87,7 +87,7 @@ class InicioScreen : Screen {
                         }
                         for (entrega in pedencias){
                             val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                            val localDateTime = LocalDate.parse(entrega.data)
+                            val localDateTime = LocalDate.parse(entrega.data_)
                             val qtd = clientesp[pedencias.indexOf(entrega)]
                             Row(Modifier.fillMaxWidth(0.75f).border(1.dp, Color.Black), Arrangement.SpaceAround){
                                 Text(entrega.id.toString(), Modifier.fillMaxWidth(0.1f).padding(8.dp))

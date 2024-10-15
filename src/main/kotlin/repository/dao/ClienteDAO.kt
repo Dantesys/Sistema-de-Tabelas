@@ -1,28 +1,32 @@
 package repository.dao
 
 import com.dantesys.Database
-import repository.data.Cliente
+import com.dantesys.Cliente
 import repository.getDB
 
 class ClienteDAO {
     companion object {
-        val db:Database = getDB()
+        private val db:Database = getDB()
         fun addFast(codigo:Long): Cliente {
             val clienteQueries = db.clienteQueries
             val cliente = clienteQueries.selectClienteCodigo(codigo).executeAsOneOrNull()
             if(cliente == null){
                 clienteQueries.insertFast(codigo)
-                return Cliente(codigo)
+                return Cliente(codigo,"","","")
             }
-            val clienteNovo = Cliente(cliente.codigo)
-            clienteNovo.nome = cliente.nome?: ""
-            clienteNovo.cidade = cliente.cidade?: ""
-            clienteNovo.bairro = cliente.bairro?: ""
-            return clienteNovo
+            return cliente
+        }
+        fun add(codigo:Long,nome:String,cidade:String,bairro:String){
+            val clienteQueries = db.clienteQueries
+            clienteQueries.insertComplet(codigo,nome,cidade,bairro)
         }
         fun edit(cliente: Cliente){
             val clienteQueries = db.clienteQueries
             clienteQueries.insertComplet(cliente.codigo,cliente.nome,cliente.cidade,cliente.bairro)
+        }
+        fun getId(id:Long):Cliente{
+            val clienteQueries = db.clienteQueries
+            return clienteQueries.selectClienteCodigo(id).executeAsOne()
         }
     }
 }

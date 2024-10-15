@@ -30,8 +30,8 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import repository.data.Cliente
-import repository.data.Entregas
+import com.dantesys.Cliente
+import com.dantesys.Entrega
 import models.EditTabelaScreenModel
 import telas.parts.loadingContent
 import telas.parts.menu
@@ -50,7 +50,7 @@ class EditTabelaScreen(val id:Long) : Screen {
         val state by screenModel.state.collectAsState()
         when (val result = state) {
             is EditTabelaScreenModel.State.Loading -> loadingContent(navigator)
-            is EditTabelaScreenModel.State.Result -> edittabelaScreen(result.entrega,navigator,screenModel)
+            is EditTabelaScreenModel.State.Result -> edittabelaScreen(result.entrega,result.clientes,navigator,screenModel)
         }
         LaunchedEffect(currentCompositeKeyHash){
             screenModel.getClientes(id)
@@ -58,21 +58,20 @@ class EditTabelaScreen(val id:Long) : Screen {
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun edittabelaScreen(entrega: Entregas, navigator: Navigator, screenModel:EditTabelaScreenModel) {
+    fun edittabelaScreen(entrega: Entrega, clientes:List<Cliente>, navigator: Navigator, screenModel:EditTabelaScreenModel) {
         val dialogState = remember { mutableStateOf(false) }
         val editState = remember { mutableStateOf(false) }
         val cNome = remember { mutableStateOf("") }
         val cCidade = remember { mutableStateOf("") }
         val cBairro = remember { mutableStateOf("") }
         val cCodigo = remember { mutableLongStateOf(0) }
-        val eCliente = remember { mutableStateOf(Cliente(0)) }
         val nome = remember { mutableStateOf(entrega.nome) }
         val focusManager = LocalFocusManager.current
         var showDatePickerDialog by remember {mutableStateOf(false)}
         val datePickerState = rememberDatePickerState()
         val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
         val formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val localDateTime = LocalDate.parse(entrega.data)
+        val localDateTime = LocalDate.parse(entrega.data_)
         val data = remember { mutableStateOf(localDateTime.format(formatter)) }
         Box(Modifier.fillMaxSize()){
             if (showDatePickerDialog) {
@@ -102,14 +101,14 @@ class EditTabelaScreen(val id:Long) : Screen {
                 )
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
-                        IconButton(onClick = {entrega.nome=nome.value;entrega.data=localDateTime.format(formatter2);dialogState.value = imprimirSave(entrega,screenModel)}){
+                        IconButton(onClick = {dialogState.value = imprimirSave(Entrega(entrega.id,nome.value,localDateTime.format(formatter2),entrega.pedencia),clientes,screenModel)}){
                             Column(horizontalAlignment = Alignment.CenterHorizontally){
                                 Text("Salvar e imprimir")
                                 Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
                             }
                         }
                         Text("Entrega Nº"+entrega.id.toString(), style = TextStyle(fontSize = 30.sp))
-                        IconButton(onClick = {entrega.nome=nome.value;entrega.data=localDateTime.format(formatter2);dialogState.value = salvar(entrega,screenModel)}){
+                        IconButton(onClick = {dialogState.value = salvar(Entrega(entrega.id,nome.value,localDateTime.format(formatter2),entrega.pedencia),clientes,screenModel)}){
                             Column(horizontalAlignment = Alignment.CenterHorizontally){
                                 Text("Salvar")
                                 Icon(imageVector =  Icons.Default.Save,"icone de salvar")
@@ -140,7 +139,7 @@ class EditTabelaScreen(val id:Long) : Screen {
                                     }
                                 }
                                 var cor: Color
-                                itemsIndexed(entrega.clientes){i,cliente ->
+                                itemsIndexed(clientes){i,cliente ->
                                     var p = true
                                     if(cliente.nome != "" && cliente.cidade != "" && cliente.bairro != ""){
                                         p=false
@@ -154,11 +153,11 @@ class EditTabelaScreen(val id:Long) : Screen {
                                     Row(Modifier.fillMaxWidth().background(cor)){
                                         Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
                                         Text(cliente.codigo.toString(), Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.bairro.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text(cliente.nome.toString().uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text(cliente.cidade.toString().uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text(cliente.bairro.toString().uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                         if(p){
-                                            IconButton(onClick = {eCliente.value=cliente;cCodigo.value=cliente.codigo;cNome.value=cliente.nome;cCidade.value=cliente.cidade;cBairro.value=cliente.bairro;editState.value=true}){
+                                            IconButton(onClick = {cCodigo.value=cliente.codigo;cNome.value=cliente.nome.toString();cCidade.value= cliente.cidade.toString();cBairro.value=cliente.bairro.toString();editState.value=true}){
                                                 Column(horizontalAlignment = Alignment.CenterHorizontally){
                                                     Icon(imageVector =  Icons.Default.Edit,"icone de editar")
                                                 }
@@ -193,7 +192,7 @@ class EditTabelaScreen(val id:Long) : Screen {
                     title = {Text("EDITAR")},
                     text = {
                         Column{
-                            Text("Código: "+cCodigo.value.toString())
+                            OutlinedTextField(cCodigo.value.toString(),{},label = {Text("Código")},readOnly = true)
                             OutlinedTextField(cNome.value,{cNome.value = it},label = {Text("Nome Fantasia")})
                             OutlinedTextField(cCidade.value,{cCidade.value = it},label = {Text("Cidade")})
                             OutlinedTextField(cBairro.value,{cBairro.value = it},label = {Text("Bairro")})
@@ -205,7 +204,7 @@ class EditTabelaScreen(val id:Long) : Screen {
                         }
                     },
                     confirmButton = {
-                        Button(onClick = {eCliente.value.nome=cNome.value;eCliente.value.cidade=cCidade.value;eCliente.value.bairro=cBairro.value;screenModel.editCliente(eCliente.value);editState.value = false;navigator.push(EditTabelaScreen(id))}) {
+                        Button(onClick = {screenModel.editCliente(Cliente(cCodigo.value,cNome.value,cCidade.value,cBairro.value),entrega.id);editState.value = false;navigator.push(EditTabelaScreen(id))}) {
                             Text("Salvar")
                         }
                     }
@@ -213,13 +212,13 @@ class EditTabelaScreen(val id:Long) : Screen {
             }
         }
     }
-    private fun salvar(entrega: Entregas, screenModel: EditTabelaScreenModel):Boolean{
-        screenModel.criarEntrega(entrega)
+    private fun salvar(entrega: Entrega,clientes:List<Cliente>, screenModel: EditTabelaScreenModel):Boolean{
+        screenModel.editEntrega(entrega,clientes)
         return true
     }
-    private fun imprimirSave(entrega: Entregas, screenModel: EditTabelaScreenModel):Boolean{
-        if(salvar(entrega,screenModel)){
-            imprimir(entrega)
+    private fun imprimirSave(entrega: Entrega,clientes:List<Cliente>, screenModel: EditTabelaScreenModel):Boolean{
+        if(salvar(entrega,clientes,screenModel)){
+            imprimir(entrega,clientes)
         }
         return true
     }

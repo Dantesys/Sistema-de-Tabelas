@@ -24,7 +24,8 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import repository.data.Entregas
+import com.dantesys.Cliente
+import com.dantesys.Entrega
 import telas.parts.loadingContent
 import models.ViewTabelaScreenModel
 import telas.parts.menu
@@ -43,16 +44,16 @@ class ViewTabelaScreen(val id:Long) : Screen {
         val state by screenModel.state.collectAsState()
         when (val result = state) {
             is ViewTabelaScreenModel.State.Loading -> loadingContent(navigator)
-            is ViewTabelaScreenModel.State.Result -> vertabelaScreen(result.entrega,navigator)
+            is ViewTabelaScreenModel.State.Result -> vertabelaScreen(result.entrega,result.clientes,navigator)
         }
         LaunchedEffect(currentCompositeKeyHash){
             screenModel.getClientes(id)
         }
     }
     @Composable
-    fun vertabelaScreen(entrega: Entregas, navigator: Navigator) {
+    fun vertabelaScreen(entrega: Entrega, clientes:List<Cliente>, navigator: Navigator) {
         val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        val localDateTime = LocalDate.parse(entrega.data)
+        val localDateTime = LocalDate.parse(entrega.data_)
         val dialogState = remember { mutableStateOf(false) }
         Box(Modifier.fillMaxSize()){
             Row(Modifier.fillMaxSize()){
@@ -64,20 +65,20 @@ class ViewTabelaScreen(val id:Long) : Screen {
                 )
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
-                        IconButton(onClick = {imprimir(entrega)}){
+                        IconButton(onClick = {imprimir(entrega,clientes)}){
                             Column(horizontalAlignment = Alignment.CenterHorizontally){
                                 Text("Imprimir")
                                 Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
                             }
                         }
                         Text(entrega.nome.uppercase()+" - "+localDateTime.format(formatter).toString(), style = TextStyle(fontSize = 30.sp))
-                        IconButton(onClick = {dialogState.value = gerarPDF(entrega)}){
+                        IconButton(onClick = {dialogState.value = gerarPDF(entrega,clientes)}){
                             Column(horizontalAlignment = Alignment.CenterHorizontally){
                                 Text("Salvar PDF")
                                 Icon(imageVector =  Icons.Default.PictureAsPdf,"icone de salvar")
                             }
                         }
-                        if(entrega.pedencia){
+                        if(entrega.pedencia>0){
                             IconButton(onClick = {navigator.push(EditTabelaScreen(id))}){
                                 Column(horizontalAlignment = Alignment.CenterHorizontally){
                                     Text("Editar")
@@ -100,7 +101,7 @@ class ViewTabelaScreen(val id:Long) : Screen {
                                     }
                                 }
                                 var cor: Color
-                                itemsIndexed(entrega.clientes){i,cliente ->
+                                itemsIndexed(clientes){i,cliente ->
                                     val num = i+1
                                     cor = if(num%2==0){
                                         Color.LightGray
@@ -110,9 +111,21 @@ class ViewTabelaScreen(val id:Long) : Screen {
                                     Row(Modifier.fillMaxWidth().background(cor)){
                                         Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
                                         Text(cliente.codigo.toString(), Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.bairro.uppercase(), Modifier.padding(8.dp))
+                                        if(cliente.nome!=null){
+                                            Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        }else{
+                                            Text("", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        }
+                                        if(cliente.cidade!=null){
+                                            Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        }else{
+                                            Text("", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        }
+                                        if(cliente.bairro!=null){
+                                            Text(cliente.bairro.uppercase(), Modifier.padding(8.dp))
+                                        }else{
+                                            Text("", Modifier.padding(8.dp))
+                                        }
                                     }
                                 }
                             }

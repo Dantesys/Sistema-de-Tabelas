@@ -13,35 +13,11 @@ SELECT * FROM Entrega WHERE pedencia>0 ORDER BY data DESC LIMIT 5;
 selectEntregaID:
 SELECT * FROM Entrega
 WHERE Entrega.id = :id;
-contar:
-SELECT count(*) FROM Entrega;
-selectPGEntrega:
-SELECT * FROM Entrega ORDER BY data DESC LIMIT :limit OFFSET :offset;
 contarFiltro:
 SELECT count(*) FROM Entrega
-WHERE ((((id LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fid = 1)
-OR ((nome LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fnome = 1)
-OR (:fdata=1 AND (DATE(data) BETWEEN :datai AND :dataf)))
-AND (:fpedencia=1 AND pedencia<=0))
-OR ((((id LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fid = 1)
-OR ((nome LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fnome = 1)
-OR (:fdata=1 AND (DATE(data) BETWEEN :datai AND :dataf)))
-AND (:fpedencia=2 AND pedencia<=0))
-OR ((id LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fid = 1)
-OR ((nome LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fnome = 1)
-OR (:fdata=1 AND (DATE(data) BETWEEN :datai AND :dataf));
+WHERE nome LIKE :filtro;
 selectPGEntregaFiltro:
 SELECT * FROM Entrega
-WHERE ((((id LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fid = 1)
-OR ((nome LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fnome = 1)
-OR (:fdata=1 AND (DATE(data) BETWEEN :datai AND :dataf)))
-AND (:fpedencia=1 AND pedencia<=0))
-OR ((((id LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fid = 1)
-OR ((nome LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fnome = 1)
-OR (:fdata=1 AND (DATE(data) BETWEEN :datai AND :dataf)))
-AND (:fpedencia=2 AND pedencia<=0))
-OR ((id LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fid = 1)
-OR ((nome LIKE (:filtro || "%") OR ("%" || :filtro)) AND :fnome = 1)
-OR (:fdata=1 AND (DATE(data) BETWEEN :datai AND :dataf))
+WHERE nome LIKE :filtro
 ORDER BY data DESC
 LIMIT :limit OFFSET :offset;

@@ -28,10 +28,9 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import repository.data.Cliente
-import repository.data.Entregas
+import com.dantesys.Cliente
+import com.dantesys.Entrega
 import models.NewTabelaScreenModel
 import telas.parts.menu
 import util.imprimir
@@ -39,18 +38,13 @@ import util.toBrazilianDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class NewTabelaScreen() : Screen {
-
+class NewTabelaScreen : Screen {
     override val key: ScreenKey = uniqueScreenKey
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = rememberScreenModel { NewTabelaScreenModel() }
-        novatabelaScreen(navigator,screenModel)
-    }
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun novatabelaScreen(navigator: Navigator, screenModel: NewTabelaScreenModel) {
         val nome = remember {mutableStateOf("")}
         val data = remember {mutableStateOf("")}
         val numero = remember {mutableLongStateOf(0)}
@@ -91,11 +85,17 @@ class NewTabelaScreen() : Screen {
                 )
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
-                        IconButton(onClick = {dialogState.value = imprimirSave(Entregas(numero.value,nome.value,data.value),screenModel,clientes)}){
-                            Icon(imageVector =  Icons.Default.Print,"icone de imprimir")
+                        Column(horizontalAlignment = Alignment.CenterHorizontally){
+                            Text("Salvar e Imprimir")
+                            IconButton(onClick = {dialogState.value = imprimirSave(Entrega(numero.value,nome.value,data.value,0L),screenModel,clientes)}){
+                                Icon(imageVector =  Icons.Default.Print,"icone de imprimir")
+                            }
                         }
-                        IconButton(onClick = {dialogState.value = salvar(Entregas(numero.value,nome.value,data.value),screenModel,clientes)}){
-                            Icon(imageVector =  Icons.Default.Save,"icone de salvar")
+                        Column(horizontalAlignment = Alignment.CenterHorizontally){
+                            Text("Salvar")
+                            IconButton(onClick = {dialogState.value = salvar(Entrega(numero.value,nome.value,data.value,0L),screenModel,clientes)}){
+                                Icon(imageVector =  Icons.Default.Save,"icone de salvar")
+                            }
                         }
                     }
                     Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround,Alignment.CenterVertically){
@@ -142,9 +142,21 @@ class NewTabelaScreen() : Screen {
                                     Row(Modifier.fillMaxWidth().background(cor)){
                                         Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
                                         Text(cliente.codigo.toString(), Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                        Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                        Text(cliente.bairro.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        if(cliente.nome!=null){
+                                            Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        }else{
+                                            Text("", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        }
+                                        if(cliente.cidade!=null){
+                                            Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        }else{
+                                            Text("", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        }
+                                        if(cliente.bairro!=null){
+                                            Text(cliente.bairro.uppercase(), Modifier.padding(8.dp))
+                                        }else{
+                                            Text("", Modifier.padding(8.dp))
+                                        }
                                         IconButton(onClick = {clienteindex.value = i;deleteState.value = true}){
                                             Column(horizontalAlignment = Alignment.CenterHorizontally){
                                                 Icon(imageVector =  Icons.Default.Delete,"icone de excluir")
@@ -195,19 +207,17 @@ class NewTabelaScreen() : Screen {
     private fun adicionarCliente(id:Long, screenModel:NewTabelaScreenModel): Cliente {
         return screenModel.addCliente(id)
     }
-    private fun salvar(entrega: Entregas, screenModel: NewTabelaScreenModel, clientes:List<Cliente>):Boolean{
+    private fun salvar(entrega: Entrega, screenModel: NewTabelaScreenModel, clientes:List<Cliente>):Boolean{
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val formatteroriginal = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        val localDateTime = LocalDate.parse(entrega.data,formatteroriginal)
+        val localDateTime = LocalDate.parse(entrega.data_,formatteroriginal)
         val dataf = localDateTime.format(formatter).toString()
-        entrega.data = dataf
-        entrega.clientes = clientes
-        screenModel.criarEntrega(entrega)
+        screenModel.criarEntrega(Entrega(entrega.id,entrega.nome,dataf,entrega.pedencia),clientes)
         return true
     }
-    private fun imprimirSave(entrega: Entregas, screenModel: NewTabelaScreenModel, clientes:List<Cliente>):Boolean{
+    private fun imprimirSave(entrega: Entrega, screenModel: NewTabelaScreenModel, clientes:List<Cliente>):Boolean{
         if(salvar(entrega,screenModel,clientes)){
-            imprimir(entrega)
+            imprimir(entrega,clientes)
         }
         return true
     }
