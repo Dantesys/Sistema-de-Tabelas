@@ -55,11 +55,13 @@ class ListTabelaScreen:Screen {
                 )
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth().padding(10.dp),Arrangement.Center,verticalAlignment = Alignment.CenterVertically){
-                        OutlinedTextField(filtro.value,{filtro.value = it},label = {Text("Buscar")})
-                        Spacer(modifier = Modifier.padding(10.dp))
-                        IconButton(onClick = {screenModel.getEntregas(filtro.value,page.value.toInt())}){
-                            Icon(imageVector =  Icons.Default.Search,"icone de busca",modifier = Modifier.size(20.dp))
-                        }
+                        OutlinedTextField(filtro.value,{filtro.value = it},label = {Text("Buscar")},singleLine=true,
+                            trailingIcon = {
+                                IconButton(onClick = {screenModel.getEntregas(filtro.value,page.value.toInt())}){
+                                    Icon(imageVector =  Icons.Default.Search,"icone de busca",modifier = Modifier.size(20.dp))
+                                }
+                            }
+                        )
                     }
                     Row(Modifier.fillMaxWidth().padding(10.dp),Arrangement.Center,verticalAlignment = Alignment.CenterVertically){
                         if(page.value>1L){

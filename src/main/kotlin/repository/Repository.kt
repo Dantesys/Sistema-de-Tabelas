@@ -10,6 +10,7 @@ class Repository {
     data class ResultInicio(val entregas: List<Entrega>, val clientes: List<Long>, val pedencias:List<Entrega>, val clientesp: List<Long>)
     data class ResultView(val entrega: Entrega, val clientes: List<Cliente>)
     data class ResultList(val entrega: List<Entrega>, val clientes: List<Long>,val pages:Long)
+    data class ResultListC(val clientes: List<Cliente>, val pages:Long)
     companion object {
         fun getView(id:Long):ResultView{
             val pedidos = PedidoDAO.getPedidosByEntrega(id)
@@ -66,6 +67,18 @@ class Repository {
                 qtdClientes.add(PedidoDAO.contarClientes(e.id))
             }
             return ResultList(entregas,qtdClientes,pages)
+        }
+        fun getListCliente(filtro:String,pag:Int,codigo:Long,nome:Long,cidade:Long,bairro:Long):ResultListC{
+            val limite = 10f
+            val offset = 10f*(pag-1)
+            val filtrolikes = "%$filtro%"
+            val qtd = ClienteDAO.countFiltro(filtrolikes,codigo,nome,cidade,bairro)
+            var pages = 1L
+            if(qtd>limite){
+                pages = (qtd.div(limite)+(qtd.div(limite)%2)).toLong()
+            }
+            val clientes = ClienteDAO.selectFiltro(filtrolikes,codigo,nome,cidade,bairro,limite.toLong(),offset.toLong())
+            return ResultListC(clientes,pages)
         }
         fun getInicio():ResultInicio{
             val entregas = EntregaDAO.selecionaInicio()

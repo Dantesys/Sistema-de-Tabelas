@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -18,8 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -106,13 +109,27 @@ class NewTabelaScreen : Screen {
                                 showDatePickerDialog = true
                                 focusManager.clearFocus(force = true)
                             }
-                        },label = {Text("Data de Saída")},readOnly = true)
+                        },label = {Text("Data de Saída")},readOnly = true, trailingIcon = {
+                            Icon(imageVector =  Icons.Default.EditCalendar,"icone de calendario")
+                        })
                     }
                     Row(Modifier.fillMaxWidth().padding(20.dp),Arrangement.Center,Alignment.CenterVertically){
-                        OutlinedTextField(clientecodigo.value.toString(),{clientecodigo.value = it.toLongOrNull()?: 0},modifier = Modifier.padding(5.dp),label = {Text("Cliente")},keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-                        IconButton(modifier = Modifier.padding(5.dp).background(Color.LightGray),onClick = {clientes.add(adicionarCliente(clientecodigo.value,screenModel));clientecodigo.value = 0}){
-                            Icon(imageVector =  Icons.Default.PersonAdd,"icone de adicionar")
-                        }
+                        OutlinedTextField(clientecodigo.value.toString(),{clientecodigo.value = it.toLongOrNull()?: clientecodigo.value},
+                            modifier = Modifier.padding(5.dp).onKeyEvent{
+                                if(it.type == KeyEventType.KeyUp && (it.key == Key.Enter) || (it.key==Key.NumPadEnter)){
+                                    clientes.add(adicionarCliente(clientecodigo.value,screenModel))
+                                    clientecodigo.value = 0
+                                }
+                                false
+                            },label = {Text("Cliente")},
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number,imeAction = ImeAction.Done),
+                            trailingIcon = {IconButton(modifier = Modifier.padding(5.dp),onClick = {clientes.add(adicionarCliente(clientecodigo.value,screenModel));clientecodigo.value = 0}){
+                                Icon(imageVector =  Icons.Default.PersonAdd,"icone de adicionar")
+                            }},
+                            keyboardActions = KeyboardActions(
+                                onDone = { clientes.add(adicionarCliente(clientecodigo.value,screenModel));clientecodigo.value = 0 }
+                            )
+                        )
                     }
                     Row{
                         Text("Quatidade de entregas: "+clientes.size.toString(), style = TextStyle(fontSize = 20.sp))
@@ -179,6 +196,7 @@ class NewTabelaScreen : Screen {
                 AlertDialog(onDismissRequest = {dialogState.value = false;navigator.popUntilRoot()},
                     title = { Text("AVISO") },
                     text = { Text("Tabela Salva com Sucesso") },
+                    backgroundColor = Color.LightGray,
                     confirmButton = {
                         Button(onClick = {dialogState.value = false;navigator.popUntilRoot()}) {
                             Text("OK")
@@ -195,6 +213,7 @@ class NewTabelaScreen : Screen {
                             Text("Não")
                         }
                     },
+                    backgroundColor = Color.LightGray,
                     confirmButton = {
                         Button(onClick = {deleteState.value = false;clientes.removeAt(clienteindex.value)}) {
                             Text("Sim")

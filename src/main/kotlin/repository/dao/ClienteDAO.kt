@@ -16,6 +16,14 @@ class ClienteDAO {
             }
             return cliente
         }
+        fun countFiltro(filtro:String,codigo:Long,nome:Long,cidade:Long,bairro:Long):Long{
+            val clienteQueries = db.clienteQueries
+            return clienteQueries.contarFiltro(filtro,codigo,nome,cidade,bairro).executeAsOne()
+        }
+        fun selectFiltro(filtro:String,codigo:Long,nome:Long,cidade:Long,bairro:Long,limit:Long,offset:Long):List<Cliente>{
+            val clienteQueries = db.clienteQueries
+            return clienteQueries.selectPGFiltro(filtro,codigo,nome,cidade,bairro,limit,offset).executeAsList()
+        }
         fun add(codigo:Long,nome:String,cidade:String,bairro:String){
             val clienteQueries = db.clienteQueries
             clienteQueries.insertComplet(codigo,nome,cidade,bairro)

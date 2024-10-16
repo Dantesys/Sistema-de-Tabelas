@@ -4,17 +4,24 @@ CREATE TABLE IF NOT EXISTS Cliente (
     cidade TEXT,
     bairro TEXT
 );
-selectAll:
-SELECT * FROM Cliente;
 selectClienteCodigo:
 SELECT * FROM Cliente WHERE codigo = :codigo LIMIT 1;
 insertFast:
 INSERT INTO Cliente(codigo) VALUES (?);
 insertComplet:
 INSERT OR REPLACE INTO Cliente(codigo,nome,cidade,bairro) VALUES (?,?,?,?);
-contarCLientes:
-SELECT count(*) FROM Cliente;
-selectPG:
-SELECT *
-FROM Cliente
+contarFiltro:
+SELECT count(*) FROM Cliente
+WHERE ((CAST(codigo AS TEXT) LIKE :filtro) AND :id>0)
+OR ((nome LIKE :filtro) AND :nome>0)
+OR ((cidade LIKE :filtro) AND :cidade>0)
+OR ((bairro LIKE :filtro) AND :bairro>0)
+OR (:id=0 AND :nome=0 AND :cidade=0 AND :bairro=0);
+selectPGFiltro:
+SELECT * FROM Cliente
+WHERE ((CAST(codigo AS TEXT) LIKE :filtro) AND :id>0)
+OR ((nome LIKE :filtro) AND :nome>0)
+OR ((cidade LIKE :filtro) AND :cidade>0)
+OR ((bairro LIKE :filtro) AND :bairro>0)
+OR (:id=0 AND :nome=0 AND :cidade=0 AND :bairro=0)
 LIMIT :limit OFFSET :offset;

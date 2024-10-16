@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -21,11 +22,12 @@ import com.dantesys.sistemadetabelas.generated.resources.Res
 import com.dantesys.sistemadetabelas.generated.resources.logo
 import org.jetbrains.compose.resources.imageResource
 import repository.Repository
+import telas.ListClienteScreen
 import telas.ListTabelaScreen
 import telas.NewTabelaScreen
 
 @Composable
-fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment.Horizontal,navigator: Navigator,inicio:Boolean=true,ntabela:Boolean=false,vtabela:Boolean=false,ncliente:Boolean=false,vcliente:Boolean=false){
+fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment.Horizontal,navigator: Navigator,inicio:Boolean=true,ntabela:Boolean=false,vtabela:Boolean=false,vcliente:Boolean=false){
     val codigo = remember {mutableLongStateOf(0L)}
     val nome = remember {mutableStateOf("")}
     val cidade = remember {mutableStateOf("")}
@@ -47,6 +49,7 @@ fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment
                         OutlinedTextField(bairro.value,{bairro.value = it},label = {Text("Bairro")})
                     }
                 },
+                backgroundColor = Color.LightGray,
                 dismissButton = {
                     Button(onClick = {newState.value = false}) {
                         Text("Cancelar")
@@ -70,13 +73,11 @@ fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment
                 Text("Inicio")
             }
         }
-        if(!ncliente){
-            Button(onClick = {newState.value = true}, Modifier.fillMaxWidth(0.9f)){
-                Text("Novo Clientes")
-            }
+        Button(onClick = {newState.value = true}, Modifier.fillMaxWidth(0.9f)){
+            Text("Novo Clientes")
         }
         if(!vcliente){
-            Button(onClick = {}, Modifier.fillMaxWidth(0.9f)){
+            Button(onClick = {navigator.push(ListClienteScreen())}, Modifier.fillMaxWidth(0.9f)){
                 Text("Ver Clientes")
             }
         }
