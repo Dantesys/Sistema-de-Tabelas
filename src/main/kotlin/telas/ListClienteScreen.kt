@@ -1,5 +1,6 @@
 package telas
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -51,6 +52,11 @@ class ListClienteScreen: Screen {
         val nom = remember { mutableStateOf(false) }
         val cid = remember { mutableStateOf(false) }
         val bai = remember { mutableStateOf(false) }
+        val editState = remember { mutableStateOf(false) }
+        val cNome = remember { mutableStateOf("") }
+        val cCidade = remember { mutableStateOf("") }
+        val cBairro = remember { mutableStateOf("") }
+        val cCodigo = remember { mutableLongStateOf(0) }
         Box(Modifier.fillMaxSize()){
             Row(Modifier.fillMaxSize()){
                 menu(
@@ -59,7 +65,7 @@ class ListClienteScreen: Screen {
                     Alignment.CenterHorizontally,
                     navigator,
                     false,
-                    vtabela = true
+                    vcliente = true
                 )
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth().padding(10.dp),Arrangement.Center,verticalAlignment = Alignment.CenterVertically){
@@ -73,7 +79,7 @@ class ListClienteScreen: Screen {
                         Spacer(modifier = Modifier.padding(10.dp))
                         Text("Filtros",style = TextStyle(fontSize = 20.sp))
                         Spacer(modifier = Modifier.padding(10.dp))
-                        Box(modifier = Modifier.border(1.dp, Color.Black)){
+                        Box(modifier = Modifier.border(1.dp, Color.Black).padding(5.dp)){
                             Row{
                                 Column(horizontalAlignment = Alignment.CenterHorizontally){
                                     Row(horizontalArrangement = Arrangement.Center,verticalAlignment = Alignment.CenterVertically){
@@ -136,14 +142,40 @@ class ListClienteScreen: Screen {
                             }else{
                                 Text("", Modifier.padding(8.dp))
                             }
-                            IconButton(onClick = {}){
+                            IconButton(onClick = {cCodigo.value=cliente.codigo;cNome.value=cliente.nome.toString();cCidade.value= cliente.cidade.toString();cBairro.value=cliente.bairro.toString();editState.value=true}){
                                 Icon(imageVector =  Icons.Default.Edit,"icone de informação")
                             }
                         }
                     }
                 }
             }
-
+            if(editState.value){
+                AlertDialog(onDismissRequest = {editState.value = false},
+                    title = {Text("EDITAR")},
+                    text = {
+                        Column{
+                            OutlinedTextField(cCodigo.value.toString(),{},label = {Text("Código")},readOnly = true,colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(51,51,0), focusedLabelColor = Color(51,51,0)))
+                            OutlinedTextField(cNome.value,{cNome.value = it},label = {Text("Nome Fantasia")},colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(51,51,0), focusedLabelColor = Color(51,51,0)))
+                            OutlinedTextField(cCidade.value,{cCidade.value = it},label = {Text("Cidade")},colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(51,51,0), focusedLabelColor = Color(51,51,0)))
+                            OutlinedTextField(cBairro.value,{cBairro.value = it},label = {Text("Bairro")},colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(51,51,0), focusedLabelColor = Color(51,51,0)))
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = {editState.value = false},
+                            border = BorderStroke(2.dp,Color.Red),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(255,204,204),contentColor = Color.Red)) {
+                            Text("Cancelar")
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {screenModel.editCliente(Cliente(cCodigo.value,cNome.value,cCidade.value,cBairro.value),filtro.value,page.value.toInt(),cod.value,nom.value,cid.value,bai.value);editState.value = false},
+                            border = BorderStroke(2.dp,Color.Green),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(204,255,204),contentColor = Color.Green)) {
+                            Text("Salvar")
+                        }
+                    }
+                )
+            }
         }
     }
 }

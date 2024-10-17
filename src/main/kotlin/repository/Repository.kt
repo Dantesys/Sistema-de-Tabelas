@@ -59,7 +59,8 @@ class Repository {
             val qtd = EntregaDAO.contar(filtrolikes)
             var pages = 1L
             if(qtd>limite){
-                pages = (qtd.div(limite)+(qtd.div(limite)%2)).toLong()
+                val div = qtd.div(limite).toLong()
+                pages = (div+(div%2))
             }
             val entregas = EntregaDAO.getEntregaByFiltro(filtrolikes,limite.toLong(),offset.toLong())
             val qtdClientes = mutableListOf<Long>()
@@ -75,7 +76,8 @@ class Repository {
             val qtd = ClienteDAO.countFiltro(filtrolikes,codigo,nome,cidade,bairro)
             var pages = 1L
             if(qtd>limite){
-                pages = (qtd.div(limite)+(qtd.div(limite)%2)).toLong()
+                val div = qtd.div(limite).toLong()
+                pages = (div+(div%2))
             }
             val clientes = ClienteDAO.selectFiltro(filtrolikes,codigo,nome,cidade,bairro,limite.toLong(),offset.toLong())
             return ResultListC(clientes,pages)

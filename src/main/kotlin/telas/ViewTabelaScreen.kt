@@ -65,25 +65,25 @@ class ViewTabelaScreen(val id:Long) : Screen {
                 )
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
-                        IconButton(onClick = {imprimir(entrega,clientes)}){
-                            Column(horizontalAlignment = Alignment.CenterHorizontally){
-                                Text("Imprimir")
-                                Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
-                            }
+                        Button(onClick = {imprimir(entrega,clientes)},
+                            border = BorderStroke(2.dp,Color.Black),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
+                            Text("Imprimir")
+                            Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
                         }
                         Text(entrega.nome.uppercase()+" - "+localDateTime.format(formatter).toString(), style = TextStyle(fontSize = 30.sp))
-                        IconButton(onClick = {dialogState.value = gerarPDF(entrega,clientes)}){
-                            Column(horizontalAlignment = Alignment.CenterHorizontally){
-                                Text("Salvar PDF")
-                                Icon(imageVector =  Icons.Default.PictureAsPdf,"icone de salvar")
-                            }
+                        Button(onClick = {dialogState.value = gerarPDF(entrega,clientes)},
+                            border = BorderStroke(2.dp,Color.Black),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
+                            Text("Salvar PDF")
+                            Icon(imageVector =  Icons.Default.PictureAsPdf,"icone de salvar")
                         }
                         if(entrega.pedencia>0){
-                            IconButton(onClick = {navigator.push(EditTabelaScreen(id))}){
-                                Column(horizontalAlignment = Alignment.CenterHorizontally){
-                                    Text("Editar")
-                                    Icon(imageVector =  Icons.Default.Edit,"icone de editar")
-                                }
+                            Button(onClick = {navigator.push(EditTabelaScreen(id))},
+                                border = BorderStroke(2.dp,Color.Black),
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
+                                Text("Editar")
+                                Icon(imageVector =  Icons.Default.Edit,"icone de editar")
                             }
                         }
                     }
@@ -141,10 +141,13 @@ class ViewTabelaScreen(val id:Long) : Screen {
             }
             if (dialogState.value) {
                 AlertDialog(onDismissRequest = {dialogState.value = false},
-                    title = {Text("AVISO")},
-                    text = {Text("PDF Salvo com Sucesso")},
+                    title = {Text("AVISO", style = TextStyle(fontSize = 30.sp))},
+                    text = {Text("PDF Salvo com Sucesso", style = TextStyle(fontSize = 20.sp))},
                     confirmButton = {
-                        Button(onClick = {dialogState.value = false}) {
+                        Button(onClick = {dialogState.value = false},
+                            border = BorderStroke(2.dp,Color.Green),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(204,255,204),contentColor = Color.Green)
+                        ) {
                             Text("OK")
                         }
                     }

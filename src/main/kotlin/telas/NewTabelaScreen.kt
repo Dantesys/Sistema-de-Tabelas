@@ -8,12 +8,15 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,15 +69,17 @@ class NewTabelaScreen : Screen {
                     confirmButton = {
                         Button(
                             onClick = {
-                                datePickerState
-                                    .selectedDateMillis?.let { millis ->
-                                        data.value = millis.toBrazilianDateFormat()
-                                    }
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    data.value = millis.toBrazilianDateFormat()
+                                }
                                 showDatePickerDialog = false
-                            }) {
-                            Text(text = "Escolher data")
+                            },border = BorderStroke(2.dp,Color.Green),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(204,255,204),contentColor = Color.Green)
+                        ){
+                            Text(text = "Selecionar")
                         }
-                    }) {
+                    }
+                ) {
                     DatePicker(state = datePickerState)
                 }
             }
@@ -89,21 +94,25 @@ class NewTabelaScreen : Screen {
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
                         Column(horizontalAlignment = Alignment.CenterHorizontally){
-                            Text("Salvar e Imprimir")
-                            IconButton(onClick = {dialogState.value = imprimirSave(Entrega(numero.value,nome.value,data.value,0L),screenModel,clientes)}){
+                            Button(onClick = {dialogState.value = imprimirSave(Entrega(numero.value,nome.value,data.value,0L),screenModel,clientes)},
+                                border = BorderStroke(2.dp,Color.Black),
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
+                                Text("Salvar e Imprimir")
                                 Icon(imageVector =  Icons.Default.Print,"icone de imprimir")
                             }
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally){
-                            Text("Salvar")
-                            IconButton(onClick = {dialogState.value = salvar(Entrega(numero.value,nome.value,data.value,0L),screenModel,clientes)}){
+                            Button(onClick = {dialogState.value = salvar(Entrega(numero.value,nome.value,data.value,0L),screenModel,clientes)},
+                                border = BorderStroke(2.dp,Color.Black),
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
+                                Text("Salvar")
                                 Icon(imageVector =  Icons.Default.Save,"icone de salvar")
                             }
                         }
                     }
                     Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround,Alignment.CenterVertically){
-                        OutlinedTextField(numero.value.toString(),{numero.value = it.toLongOrNull()?: 0},label = {Text("N° da entrega")},keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-                        OutlinedTextField(nome.value,{nome.value = it},label = {Text("Nome da entrega")})
+                        OutlinedTextField(numero.value.toString(),{numero.value = it.toLongOrNull()?: 0},label = {Text("N° da entrega")},keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(232,253,44), focusedLabelColor = Color(232,253,44)))
+                        OutlinedTextField(nome.value,{nome.value = it},label = {Text("Nome da entrega")},colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(232,253,44), focusedLabelColor = Color(232,253,44)))
                         OutlinedTextField(data.value,{}, modifier = Modifier.onFocusEvent {
                             if (it.isFocused) {
                                 showDatePickerDialog = true
@@ -111,7 +120,7 @@ class NewTabelaScreen : Screen {
                             }
                         },label = {Text("Data de Saída")},readOnly = true, trailingIcon = {
                             Icon(imageVector =  Icons.Default.EditCalendar,"icone de calendario")
-                        })
+                        },colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(232,253,44), focusedLabelColor = Color(232,253,44)))
                     }
                     Row(Modifier.fillMaxWidth().padding(20.dp),Arrangement.Center,Alignment.CenterVertically){
                         OutlinedTextField(clientecodigo.value.toString(),{clientecodigo.value = it.toLongOrNull()?: clientecodigo.value},
@@ -128,7 +137,7 @@ class NewTabelaScreen : Screen {
                             }},
                             keyboardActions = KeyboardActions(
                                 onDone = { clientes.add(adicionarCliente(clientecodigo.value,screenModel));clientecodigo.value = 0 }
-                            )
+                            ),colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(232,253,44), focusedLabelColor = Color(232,253,44))
                         )
                     }
                     Row{
@@ -194,11 +203,13 @@ class NewTabelaScreen : Screen {
             }
             if (dialogState.value) {
                 AlertDialog(onDismissRequest = {dialogState.value = false;navigator.popUntilRoot()},
-                    title = { Text("AVISO") },
-                    text = { Text("Tabela Salva com Sucesso") },
-                    backgroundColor = Color.LightGray,
+                    title = { Text("AVISO", style = TextStyle(fontSize = 30.sp)) },
+                    text = { Text("Tabela Salva com Sucesso!", style = TextStyle(fontSize = 20.sp)) },
                     confirmButton = {
-                        Button(onClick = {dialogState.value = false;navigator.popUntilRoot()}) {
+                        Button(onClick = {dialogState.value = false;navigator.popUntilRoot()},
+                            border = BorderStroke(2.dp,Color.Green),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(204,255,204),contentColor = Color.Green)
+                        ){
                             Text("OK")
                         }
                     }
@@ -206,16 +217,21 @@ class NewTabelaScreen : Screen {
             }
             if (deleteState.value) {
                 AlertDialog(onDismissRequest = {deleteState.value = false},
-                    title = { Text("AVISO") },
-                    text = { Text("Tem certesa de excluir o cliente") },
+                    title = { Text("AVISO", style = TextStyle(fontSize = 30.sp)) },
+                    text = { Text("Tem certesa de excluir o cliente!", style = TextStyle(fontSize = 20.sp)) },
                     dismissButton = {
-                        Button(onClick = {deleteState.value = false}) {
+                        Button(onClick = {deleteState.value = false},
+                            border = BorderStroke(2.dp,Color.Red),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(255,204,204),contentColor = Color.Red)
+                        ){
                             Text("Não")
                         }
                     },
-                    backgroundColor = Color.LightGray,
                     confirmButton = {
-                        Button(onClick = {deleteState.value = false;clientes.removeAt(clienteindex.value)}) {
+                        Button(onClick = {deleteState.value = false;clientes.removeAt(clienteindex.value)},
+                            border = BorderStroke(2.dp,Color.Green),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(204,255,204),contentColor = Color.Green)
+                        ){
                             Text("Sim")
                         }
                     }

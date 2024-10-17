@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.dantesys"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")

@@ -15,13 +15,13 @@ import cafe.adriel.voyager.navigator.Navigator
 fun loadingContent(navigator: Navigator) {
     MaterialTheme {
         Row(Modifier.fillMaxSize()){
-            menu(Modifier.fillMaxWidth(0.2f).fillMaxHeight().background(Color(250,255,196)),Arrangement.spacedBy(10.dp),Alignment.CenterHorizontally,navigator)
+            menu(Modifier.fillMaxWidth(0.2f).fillMaxHeight().background(Color(250,255,196)),Arrangement.spacedBy(10.dp),Alignment.CenterHorizontally,navigator,inicio = false)
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = Color.Yellow)
                 }
             }
         }

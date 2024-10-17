@@ -4,8 +4,6 @@ import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.dantesys.Cliente
 import com.dantesys.Entrega
-import repository.dao.ClienteDAO
-import repository.dao.EntregaDAO
 import kotlinx.coroutines.launch
 import repository.Repository
 
