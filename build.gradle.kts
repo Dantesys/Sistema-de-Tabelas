@@ -7,7 +7,7 @@ plugins {
     id("app.cash.sqldelight") version "2.0.2"
 }
 group = "com.dantesys"
-version = "1.0.3"
+version = "1.0.5"
 repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
