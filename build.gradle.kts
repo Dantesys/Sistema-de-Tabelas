@@ -6,9 +6,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("app.cash.sqldelight") version "2.0.2"
 }
-
 group = "com.dantesys"
-version = "1.0.1"
+version = "1.0.3"
 repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
@@ -51,6 +50,7 @@ compose.desktop {
             packageName = "sistemadetabelas"
             packageVersion = "$version"
             windows {
+                includeAllModules = true
                 dirChooser = true
                 iconFile.set(project.file("src/main/resources/icon.ico"))
             }

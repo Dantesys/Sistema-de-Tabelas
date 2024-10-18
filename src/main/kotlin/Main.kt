@@ -7,8 +7,14 @@ import com.dantesys.sistemadetabelas.generated.resources.logo
 import org.jetbrains.compose.resources.painterResource
 import telas.InicioScreen
 import repository.getDriver
+import java.io.File
 
 fun main() = application {
+    val file = File("sistema.db")
+    if(!file.exists())
+    {
+        file.createNewFile()
+    }
     Database.Schema.create(getDriver())
     Window(onCloseRequest = ::exitApplication,title = "Sistema de Tabelas", icon = painterResource(Res.drawable.logo)) {
         Navigator(InicioScreen())
