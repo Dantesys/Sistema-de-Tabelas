@@ -118,7 +118,7 @@ class ListClienteScreen: Screen {
                         }
                     }
                     Row(Modifier.fillMaxWidth(0.75f).border(1.dp, Color.Black), Arrangement.SpaceAround){
-                        Text("Código°", Modifier.fillMaxWidth(0.1f).padding(8.dp))
+                        Text("Código", Modifier.fillMaxWidth(0.1f).padding(8.dp))
                         Text("Nome", Modifier.fillMaxWidth(0.4f).padding(8.dp))
                         Text("Cidade", Modifier.fillMaxWidth(0.4f).padding(8.dp))
                         Text("Bairro", Modifier.padding(8.dp))

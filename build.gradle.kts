@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.dantesys"
-version = "1.0.0"
+version = "1.0.1"
 repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
@@ -46,14 +46,13 @@ sqldelight {
 compose.desktop {
     application {
         mainClass = "MainKt"
-
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "sistemadetabelas"
-            packageVersion = "1.0.0"
+            packageVersion = "$version"
             windows {
                 dirChooser = true
-                iconFile.set(project.file("icon.ico"))
+                iconFile.set(project.file("src/main/resources/icon.ico"))
             }
         }
     }
