@@ -172,16 +172,15 @@ class NewTabelaScreen : Screen {
                                 }
                                 var cor: Color
                                 itemsIndexed(clientes){i,cliente ->
-                                    val num = i+1
-                                    cor = if(num%2==0){
-                                        Color.LightGray
-                                    }else{
-                                        Color.White
-                                    }
                                     ReorderableItem(stateList,key=cliente){ isDragging ->
                                         val elevation = animateDpAsState(if (isDragging) 16.dp else 0.dp)
-                                        if(isDragging){
-                                            cor=Color.Green
+                                        val num = i+1
+                                        cor = if(isDragging){
+                                            Color.Green
+                                        }else if(num%2==0){
+                                            Color.LightGray
+                                        }else{
+                                            Color.White
                                         }
                                         Row(Modifier.fillMaxWidth().background(cor).shadow(elevation.value)){
                                             Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
