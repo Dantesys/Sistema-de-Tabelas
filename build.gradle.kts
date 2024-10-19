@@ -32,6 +32,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
     implementation("org.apache.pdfbox:pdfbox:3.0.3")
     implementation("com.github.vandeseer:easytable:1.0.2")
+    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 }
 
 sqldelight {
