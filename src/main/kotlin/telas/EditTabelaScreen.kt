@@ -101,18 +101,18 @@ class EditTabelaScreen(val id:Long) : Screen {
                 )
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
-                        IconButton(onClick = {dialogState.value = imprimirSave(Entrega(entrega.id,nome.value,localDateTime.format(formatter2),entrega.pedencia),clientes,screenModel)}){
-                            Column(horizontalAlignment = Alignment.CenterHorizontally){
-                                Text("Salvar e imprimir")
-                                Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
-                            }
+                        Button(onClick = {dialogState.value = imprimirSave(Entrega(entrega.id,nome.value,localDateTime.format(formatter2),entrega.pedencia),clientes,screenModel)},
+                            border = BorderStroke(2.dp,Color.Black),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
+                            Text("Salvar e imprimir")
+                            Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
                         }
                         Text("Entrega Nº"+entrega.id.toString(), style = TextStyle(fontSize = 30.sp))
-                        IconButton(onClick = {dialogState.value = salvar(Entrega(entrega.id,nome.value,localDateTime.format(formatter2),entrega.pedencia),clientes,screenModel)}){
-                            Column(horizontalAlignment = Alignment.CenterHorizontally){
-                                Text("Salvar")
-                                Icon(imageVector =  Icons.Default.Save,"icone de salvar")
-                            }
+                        Button(onClick = {dialogState.value = salvar(Entrega(entrega.id,nome.value,localDateTime.format(formatter2),entrega.pedencia),clientes,screenModel)},
+                            border = BorderStroke(2.dp,Color.Black),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
+                            Text("Salvar")
+                            Icon(imageVector =  Icons.Default.Save,"icone de salvar")
                         }
                     }
                     Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround,Alignment.CenterVertically){
@@ -178,10 +178,13 @@ class EditTabelaScreen(val id:Long) : Screen {
             }
             if (dialogState.value) {
                 AlertDialog(onDismissRequest = {dialogState.value = false},
-                    title = {Text("AVISO")},
-                    text = {Text("Salvo com Sucesso")},
+                    title = {Text("AVISO", style = TextStyle(fontSize = 30.sp))},
+                    text = {Text("Salvo com Sucesso", style = TextStyle(fontSize = 20.sp))},
                     confirmButton = {
-                        Button(onClick = {dialogState.value = false;navigator.popUntil { it==ViewTabelaScreen::class }}) {
+                        Button(onClick = {dialogState.value = false;navigator.popUntil { it==ViewTabelaScreen::class }},
+                            border = BorderStroke(2.dp,Color.Green),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(204,255,204),contentColor = Color.Green)
+                        ){
                             Text("OK")
                         }
                     }
@@ -189,7 +192,7 @@ class EditTabelaScreen(val id:Long) : Screen {
             }
             if(editState.value){
                 AlertDialog(onDismissRequest = {editState.value = false},
-                    title = {Text("EDITAR")},
+                    title = {Text("EDITAR", style = TextStyle(fontSize = 30.sp))},
                     text = {
                         Column{
                             OutlinedTextField(cCodigo.value.toString(),{},label = {Text("Código")},readOnly = true)
@@ -199,13 +202,19 @@ class EditTabelaScreen(val id:Long) : Screen {
                         }
                     },
                     dismissButton = {
-                        Button(onClick = {editState.value = false}) {
-                            Text("Cancelar")
+                        Button(onClick = {editState.value = false},
+                            border = BorderStroke(2.dp,Color.Red),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(255,204,204),contentColor = Color.Green)
+                        ) {
+                        Text("Cancelar")
                         }
                     },
                     confirmButton = {
-                        Button(onClick = {screenModel.editCliente(Cliente(cCodigo.value,cNome.value,cCidade.value,cBairro.value),entrega.id);editState.value = false;navigator.push(EditTabelaScreen(id))}) {
-                            Text("Salvar")
+                        Button(onClick = {screenModel.editCliente(Cliente(cCodigo.value,cNome.value,cCidade.value,cBairro.value),entrega.id);editState.value = false;navigator.push(EditTabelaScreen(id))},
+                            border = BorderStroke(2.dp,Color.Green),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(204,255,204),contentColor = Color.Green)
+                        ) {
+                        Text("Salvar")
                         }
                     }
                 )

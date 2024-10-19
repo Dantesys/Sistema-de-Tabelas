@@ -63,7 +63,7 @@ fun gerarDoc(entrega:Entrega,clientes:List<Cliente>):PDDocument{
         if(num%2==1){
             cor = Color.LIGHT_GRAY
         }
-        var temp = tabela
+        val temp = tabela
         val height = temp.build().height+60f
         if(height>=PDRectangle.A4.height || height>=pagina.mediaBox.height){
             val desenhar = TableDrawer.builder()
