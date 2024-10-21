@@ -5,6 +5,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -16,11 +17,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
@@ -39,10 +40,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.dantesys.Cliente
 import com.dantesys.Entrega
 import models.NewTabelaScreenModel
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.detectReorderAfterLongPress
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import telas.parts.menu
 import util.imprimir
 import util.toBrazilianDateFormat
@@ -51,7 +50,7 @@ import java.time.format.DateTimeFormatter
 
 class NewTabelaScreen : Screen {
     override val key: ScreenKey = uniqueScreenKey
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
@@ -62,15 +61,14 @@ class NewTabelaScreen : Screen {
         val dialogState = remember {mutableStateOf(false)}
         val deleteState = remember {mutableStateOf(false)}
         val clientecodigo = remember {mutableLongStateOf(0)}
-        val clientes = remember { mutableStateListOf(Cliente(0,"","","")) }
+        val clientes = remember { mutableListOf(Cliente(0,"","","")) }
         clientes.remove(Cliente(0,"","",""))
-        val stateList = rememberReorderableLazyListState(onMove = { from, to ->
-            println("ANTES :${clientes.toList()}")
-            val aux = clientes[from.index]
-            clientes.removeAt(from.index)
-            clientes.add(to.index, aux)
-            println("DEPOIS:${clientes.toList()}")
-        })
+        val state = rememberLazyListState()
+        val reordem = rememberReorderableLazyListState(lazyListState = state,scrollThresholdPadding = WindowInsets.systemBars.asPaddingValues()) { from, to ->
+            val aux = clientes[from.index-1]
+            clientes.removeAt(from.index-1)
+            clientes.add(to.index-1, aux)
+        }
         val clienteindex = remember {mutableIntStateOf(0)}
         val focusManager = LocalFocusManager.current
         var showDatePickerDialog by remember {mutableStateOf(false)}
@@ -159,8 +157,8 @@ class NewTabelaScreen : Screen {
                     }
                     Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround,Alignment.CenterVertically){
                         Box(Modifier.fillMaxSize().padding(50.dp).align(Alignment.CenterVertically)){
-                            LazyColumn(Modifier.fillMaxSize().reorderable(stateList).detectReorderAfterLongPress(stateList), horizontalAlignment = Alignment.CenterHorizontally,state = stateList.listState) {
-                                stickyHeader {
+                            LazyColumn(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,state = state) {
+                                item {
                                     Row(Modifier.fillMaxWidth().border(1.dp, Color.Black)){
                                         Text("Entrega", Modifier.fillMaxWidth(0.15f).padding(8.dp))
                                         Text("Código", Modifier.fillMaxWidth(0.15f).padding(8.dp))
@@ -170,48 +168,56 @@ class NewTabelaScreen : Screen {
                                         Text("Excluir", Modifier.padding(8.dp))
                                     }
                                 }
-                                var cor: Color
-                                itemsIndexed(clientes){i,cliente ->
-                                    ReorderableItem(stateList,key=cliente){ isDragging ->
-                                        val elevation = animateDpAsState(if (isDragging) 16.dp else 0.dp)
+                                itemsIndexed(clientes, key = {_, cliente -> cliente.codigo}){i, cliente ->
+                                    ReorderableItem(reordem, cliente.codigo){ isDragging ->
                                         val num = i+1
-                                        cor = if(isDragging){
+                                        val cor = if(isDragging){
                                             Color.Green
                                         }else if(num%2==0){
                                             Color.LightGray
                                         }else{
                                             Color.White
                                         }
-                                        Row(Modifier.fillMaxWidth().background(cor).shadow(elevation.value)){
-                                            Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                            Text(cliente.codigo.toString(), Modifier.fillMaxWidth(0.15f).padding(8.dp))
-                                            if(cliente.nome!=null){
-                                                Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                            }else{
-                                                Text("", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+                                        Surface(shadowElevation = elevation) {
+                                            Row(verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.padding(16.dp).background(cor)
+                                            ){
+                                                Text("$num°", Modifier.fillMaxWidth(0.15f).padding(8.dp))
+                                                Text(cliente.codigo.toString(), Modifier.fillMaxWidth(0.15f).padding(8.dp))
+                                                if(cliente.nome!=null){
+                                                    Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                                }else{
+                                                    Text("", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                                }
+                                                if(cliente.cidade!=null){
+                                                    Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                                }else{
+                                                    Text("", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                                }
+                                                if(cliente.bairro!=null){
+                                                    Text(cliente.bairro.uppercase(), Modifier.padding(8.dp))
+                                                }else{
+                                                    Text("", Modifier.padding(8.dp))
+                                                }
+                                                IconButton(
+                                                    modifier = Modifier.draggableHandle(),
+                                                    onClick = {},
+                                                ) {
+                                                    Icon(Icons.Rounded.DragHandle, contentDescription = "Reorder")
+                                                }
+                                                IconButton(onClick = { clienteindex.value = i;deleteState.value = true }){
+                                                    Icon(imageVector =  Icons.Default.Delete,"icone de excluir")
+                                                }
                                             }
-                                            if(cliente.cidade!=null){
-                                                Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                            }else{
-                                                Text("", Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                                            }
-                                            if(cliente.bairro!=null){
-                                                Text(cliente.bairro.uppercase(), Modifier.padding(8.dp))
-                                            }else{
-                                                Text("", Modifier.padding(8.dp))
-                                            }
-                                            IconButton(onClick = {clienteindex.value = i;deleteState.value = true}){
-                                                Icon(imageVector =  Icons.Default.Delete,"icone de excluir")
-                                            }
+                                            HorizontalDivider()
                                         }
                                     }
                                 }
                             }
                             VerticalScrollbar(
                                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                                adapter = rememberScrollbarAdapter(
-                                    scrollState = stateList.listState
-                                )
+                                adapter = rememberScrollbarAdapter(state)
                             )
                         }
                     }
