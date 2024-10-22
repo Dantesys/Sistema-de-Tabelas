@@ -195,7 +195,7 @@ class EditTabelaScreen(val id:Long) : Screen {
                     title = {Text("EDITAR", style = TextStyle(fontSize = 30.sp))},
                     text = {
                         Column{
-                            OutlinedTextField(cCodigo.value.toString(),{},label = {Text("Código")},readOnly = true)
+                            OutlinedTextField(cCodigo.value.toString(),{cCodigo.value = it.toLongOrNull()?: 0},label = {Text("Código")})
                             OutlinedTextField(cNome.value,{cNome.value = it},label = {Text("Nome Fantasia")})
                             OutlinedTextField(cCidade.value,{cCidade.value = it},label = {Text("Cidade")})
                             OutlinedTextField(cBairro.value,{cBairro.value = it},label = {Text("Bairro")})
@@ -204,7 +204,7 @@ class EditTabelaScreen(val id:Long) : Screen {
                     dismissButton = {
                         Button(onClick = {editState.value = false},
                             border = BorderStroke(2.dp,Color.Red),
-                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(255,204,204),contentColor = Color.Green)
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(255,204,204),contentColor = Color.Red)
                         ) {
                         Text("Cancelar")
                         }
