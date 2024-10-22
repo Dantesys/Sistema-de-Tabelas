@@ -1,7 +1,7 @@
 package telas
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.*
+import androidx.compose.material3.Card
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +27,10 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -48,6 +53,7 @@ import util.toBrazilianDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+data class CLT(val id:Long,val cliente: Cliente)
 class NewTabelaScreen : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @OptIn(ExperimentalMaterial3Api::class)
@@ -61,13 +67,17 @@ class NewTabelaScreen : Screen {
         val dialogState = remember {mutableStateOf(false)}
         val deleteState = remember {mutableStateOf(false)}
         val clientecodigo = remember {mutableLongStateOf(0)}
-        val clientes = remember { mutableListOf(Cliente(0,"","","")) }
-        clientes.remove(Cliente(0,"","",""))
+        val qtdCli = remember{mutableIntStateOf(0)}
+        val clientes = remember { mutableListOf(CLT(0,Cliente(0,"","",""))) }
+        clientes.remove(CLT(0,Cliente(0,"","","")))
         val state = rememberLazyListState()
-        val reordem = rememberReorderableLazyListState(lazyListState = state,scrollThresholdPadding = WindowInsets.systemBars.asPaddingValues()) { from, to ->
-            val aux = clientes[from.index-1]
-            clientes.removeAt(from.index-1)
-            clientes.add(to.index-1, aux)
+        val reordem = rememberReorderableLazyListState(lazyListState = state) { from, to ->
+            val toindex = clientes.indexOfFirst { it.id == to.key }
+            val fromindex = clientes.indexOfFirst { it.id == from.key }
+            val aux = clientes.removeAt(fromindex)
+            qtdCli.value--
+            clientes.add(toindex,aux)
+            qtdCli.value++
         }
         val clienteindex = remember {mutableIntStateOf(0)}
         val focusManager = LocalFocusManager.current
@@ -105,7 +115,7 @@ class NewTabelaScreen : Screen {
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
                         Column(horizontalAlignment = Alignment.CenterHorizontally){
-                            Button(onClick = {dialogState.value = imprimirSave(Entrega(numero.value,nome.value,data.value,0L),screenModel,clientes)},
+                            Button(onClick = {dialogState.value = imprimirSave(Entrega(numero.value,nome.value,data.value,0L),screenModel,getClientes(clientes))},
                                 border = BorderStroke(2.dp,Color.Black),
                                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
                                 Text("Salvar e Imprimir")
@@ -113,7 +123,7 @@ class NewTabelaScreen : Screen {
                             }
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally){
-                            Button(onClick = {dialogState.value = salvar(Entrega(numero.value,nome.value,data.value,0L),screenModel,clientes)},
+                            Button(onClick = {dialogState.value = salvar(Entrega(numero.value,nome.value,data.value,0L),screenModel,getClientes(clientes))},
                                 border = BorderStroke(2.dp,Color.Black),
                                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
                                 Text("Salvar")
@@ -137,7 +147,9 @@ class NewTabelaScreen : Screen {
                         OutlinedTextField(clientecodigo.value.toString(),{clientecodigo.value = it.toLongOrNull()?: clientecodigo.value},
                             modifier = Modifier.padding(5.dp).onKeyEvent{
                                 if(it.type == KeyEventType.KeyUp && (it.key == Key.Enter) || (it.key==Key.NumPadEnter)){
-                                    clientes.add(adicionarCliente(clientecodigo.value,screenModel))
+                                    val temp = genID(clientecodigo.value,clientes.size)
+                                    clientes.add(CLT(temp,adicionarCliente(clientecodigo.value,screenModel)))
+                                    qtdCli.value++
                                     clientecodigo.value = 0
                                 }
                                 false
@@ -146,14 +158,16 @@ class NewTabelaScreen : Screen {
                             trailingIcon = {Icon(imageVector =  Icons.Default.PersonAdd,"icone de adicionar") },
                             keyboardActions = KeyboardActions(
                                 onDone = {
-                                    clientes.add(adicionarCliente(clientecodigo.value,screenModel))
+                                    val temp = genID(clientecodigo.value,clientes.size)
+                                    clientes.add(CLT(temp,adicionarCliente(clientecodigo.value,screenModel)))
+                                    qtdCli.value++
                                     clientecodigo.value = 0
                                 }
                             ),colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(232,253,44), focusedLabelColor = Color(232,253,44))
                         )
                     }
                     Row{
-                        Text("Quatidade de entregas: ${clientes.size}", style = TextStyle(fontSize = 20.sp))
+                        Text("Quatidade de entregas: ${qtdCli.value}", style = TextStyle(fontSize = 20.sp))
                     }
                     Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround,Alignment.CenterVertically){
                         Box(Modifier.fillMaxSize().padding(50.dp).align(Alignment.CenterVertically)){
@@ -168,18 +182,52 @@ class NewTabelaScreen : Screen {
                                         Text("Excluir", Modifier.padding(8.dp))
                                     }
                                 }
-                                itemsIndexed(clientes, key = {_, cliente -> cliente.codigo}){i, cliente ->
-                                    ReorderableItem(reordem, cliente.codigo){ isDragging ->
-                                        val num = i+1
-                                        val cor = if(isDragging){
-                                            Color.Green
-                                        }else if(num%2==0){
+                                itemsIndexed(clientes, key = {_,c -> c.id}){si, c ->
+                                    val cliente = c.cliente
+                                    ReorderableItem(reordem,key = c.id){
+                                        val num = si+1
+                                        val cor = if(num%2==0){
                                             Color.LightGray
                                         }else{
                                             Color.White
                                         }
-                                        val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
-                                        Surface(shadowElevation = elevation) {
+                                        val interactionSource = remember { MutableInteractionSource() }
+                                        Card(
+                                            onClick = {},
+                                            modifier = Modifier.semantics {
+                                                customActions = listOf(
+                                                    CustomAccessibilityAction(
+                                                        label = "Move Up",action = {
+                                                            val ind = si+1
+                                                            if (ind > 0) {
+                                                                val aux = clientes.removeAt(ind)
+                                                                qtdCli.value--
+                                                                clientes.add(ind-1, aux)
+                                                                qtdCli.value++
+                                                                true
+                                                            } else { false }
+                                                        }
+                                                    ),CustomAccessibilityAction(
+                                                        label = "Move Down",action = {
+                                                            val ind = si+1
+                                                            if (ind < clientes.size - 1) {
+                                                                val aux = clientes.removeAt(ind)
+                                                                qtdCli.value--
+                                                                clientes.add(ind+1, aux)
+                                                                qtdCli.value++
+                                                                true
+                                                            } else { false }
+                                                        }
+                                                    )
+                                                )
+                                            },
+                                            enabled = true,
+                                            shape = ShapeDefaults.Small,
+                                            colors = CardColors(cor,Color.Black,cor,Color.Black),
+                                            elevation = CardDefaults.elevatedCardElevation(0.dp,1.dp,0.dp,1.dp,5.dp,0.dp),
+                                            border = BorderStroke(2.dp,Color.Black),
+                                            interactionSource = interactionSource
+                                        ){
                                             Row(verticalAlignment = Alignment.CenterVertically,
                                                 modifier = Modifier.padding(16.dp).background(cor)
                                             ){
@@ -201,12 +249,16 @@ class NewTabelaScreen : Screen {
                                                     Text("", Modifier.padding(8.dp))
                                                 }
                                                 IconButton(
-                                                    modifier = Modifier.draggableHandle(),
+                                                    modifier = Modifier.draggableHandle(
+                                                        onDragStarted = {},
+                                                        onDragStopped = {},
+                                                        interactionSource = interactionSource,
+                                                    ).clearAndSetSemantics { },
                                                     onClick = {},
                                                 ) {
                                                     Icon(Icons.Rounded.DragHandle, contentDescription = "Reorder")
                                                 }
-                                                IconButton(onClick = { clienteindex.value = i;deleteState.value = true }){
+                                                IconButton(onClick = { clienteindex.value = si;deleteState.value = true }){
                                                     Icon(imageVector =  Icons.Default.Delete,"icone de excluir")
                                                 }
                                             }
@@ -253,6 +305,7 @@ class NewTabelaScreen : Screen {
                         Button(onClick = {
                             deleteState.value = false
                             clientes.removeAt(clienteindex.value)
+                            qtdCli.value--
                         },
                             border = BorderStroke(2.dp,Color.Green),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(204,255,204),contentColor = Color.Green)
@@ -263,6 +316,20 @@ class NewTabelaScreen : Screen {
                 )
             }
         }
+    }
+    private fun getClientes(lista:List<CLT>):List<Cliente>{
+        val clientes = mutableListOf(Cliente(0,"","",""))
+        clientes.clear()
+        lista.map { clt ->
+            clientes.add(clt.cliente)
+        }
+        return clientes
+    }
+    private fun genID(codigo:Long,tamanho:Int):Long{
+        if(tamanho%2==0){
+            return (codigo*15)+(tamanho*1999)
+        }
+        return (codigo*1999)+(tamanho*15)
     }
     private fun adicionarCliente(id:Long, screenModel:NewTabelaScreenModel): Cliente {
         return screenModel.addCliente(id)
