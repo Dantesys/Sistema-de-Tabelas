@@ -147,10 +147,12 @@ class NewTabelaScreen : Screen {
                         OutlinedTextField(clientecodigo.value.toString(),{clientecodigo.value = it.toLongOrNull()?: clientecodigo.value},
                             modifier = Modifier.padding(5.dp).onKeyEvent{
                                 if(it.type == KeyEventType.KeyUp && (it.key == Key.Enter) || (it.key==Key.NumPadEnter)){
-                                    val temp = genID(clientecodigo.value,clientes.size)
-                                    clientes.add(CLT(temp,adicionarCliente(clientecodigo.value,screenModel)))
-                                    qtdCli.value++
-                                    clientecodigo.value = 0
+                                    if(clientecodigo.value!=0L){
+                                        val temp = genID(clientecodigo.value,clientes.size)
+                                        clientes.add(CLT(temp,adicionarCliente(clientecodigo.value,screenModel)))
+                                        qtdCli.value++
+                                        clientecodigo.value = 0
+                                    }
                                 }
                                 false
                             },label = {Text("Cliente")},
@@ -158,10 +160,12 @@ class NewTabelaScreen : Screen {
                             trailingIcon = {Icon(imageVector =  Icons.Default.PersonAdd,"icone de adicionar") },
                             keyboardActions = KeyboardActions(
                                 onDone = {
-                                    val temp = genID(clientecodigo.value,clientes.size)
-                                    clientes.add(CLT(temp,adicionarCliente(clientecodigo.value,screenModel)))
-                                    qtdCli.value++
-                                    clientecodigo.value = 0
+                                    if(clientecodigo.value!=0L){
+                                        val temp = genID(clientecodigo.value,clientes.size)
+                                        clientes.add(CLT(temp,adicionarCliente(clientecodigo.value,screenModel)))
+                                        qtdCli.value++
+                                        clientecodigo.value = 0
+                                    }
                                 }
                             ),colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = Color(232,253,44), focusedLabelColor = Color(232,253,44))
                         )

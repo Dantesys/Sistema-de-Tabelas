@@ -78,7 +78,9 @@ class ViewTabelaScreen(val id:Long) : Screen {
                             Text("Salvar PDF")
                             Icon(imageVector =  Icons.Default.PictureAsPdf,"icone de salvar")
                         }
-                        if(entrega.pedencia>0){
+                    }
+                    if(entrega.pedencia>0){
+                        Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
                             Button(onClick = {navigator.push(EditTabelaScreen(id))},
                                 border = BorderStroke(2.dp,Color.Black),
                                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
