@@ -1,8 +1,13 @@
 package telas
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -10,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -57,9 +63,15 @@ class ListTabelaScreen:Screen {
                     Row(Modifier.fillMaxWidth().padding(10.dp),Arrangement.Center,verticalAlignment = Alignment.CenterVertically){
                         OutlinedTextField(filtro.value,{filtro.value = it},label = {Text("Buscar")},singleLine=true,
                             trailingIcon = {
-                                IconButton(onClick = {screenModel.getEntregas(filtro.value,page.value.toInt())}){
+                                IconButton(onClick = {page.value=1L;screenModel.getEntregas(filtro.value,page.value.toInt())}){
                                     Icon(imageVector =  Icons.Default.Search,"icone de busca",modifier = Modifier.size(20.dp))
                                 }
+                            },modifier = Modifier.onKeyEvent {
+                                if(it.type == KeyEventType.KeyUp && (it.key == Key.Enter) || (it.key==Key.NumPadEnter)){
+                                    page.value=1L
+                                    screenModel.getEntregas(filtro.value,page.value.toInt())
+                                }
+                                false
                             }
                         )
                     }
@@ -76,29 +88,44 @@ class ListTabelaScreen:Screen {
                             }
                         }
                     }
-                    Row(Modifier.fillMaxWidth(0.75f).border(1.dp, Color.Black), Arrangement.SpaceAround){
-                        Text("N°", Modifier.fillMaxWidth(0.1f).padding(8.dp))
-                        Text("Nome", Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                        Text("Data", Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                        Text("Entregas", Modifier.padding(8.dp))
-                        Text("Detalhar", Modifier.padding(8.dp))
-                    }
-                    for (entrega in entregas){
-                        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                        val localDateTime = LocalDate.parse(entrega.data_)
-                        val qtd = clientes[entregas.indexOf(entrega)]
-                        Row(Modifier.fillMaxWidth(0.75f).border(1.dp, Color.Black), Arrangement.SpaceAround){
-                            Text(entrega.id.toString(), Modifier.fillMaxWidth(0.1f).padding(8.dp))
-                            Text(entrega.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                            Text(localDateTime.format(formatter).toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                            Text(qtd.toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                            IconButton(onClick = {navigator.push(ViewTabelaScreen(entrega.id))}){
-                                if(entrega.pedencia<1L){
-                                    Icon(imageVector =  Icons.Default.Search,"icone de informação")
-                                }else{
-                                    Icon(imageVector =  Icons.Default.Search,"icone de informação",tint = Color.Red)
+                    Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround, Alignment.CenterVertically){
+                        Box(Modifier.fillMaxSize().padding(50.dp).align(Alignment.CenterVertically)){
+                            val state = rememberLazyListState()
+                            LazyColumn(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,state = state) {
+                                item{
+                                    Row(Modifier.fillMaxWidth().border(1.dp, Color.Black), Arrangement.SpaceAround){
+                                        Text("N°", Modifier.fillMaxWidth(0.1f).padding(8.dp))
+                                        Text("Nome", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text("Data", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text("Entregas", Modifier.padding(8.dp))
+                                        Text("Detalhar", Modifier.padding(8.dp))
+                                    }
+                                }
+                                itemsIndexed(entregas){_,entrega ->
+                                    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                                    val localDateTime = LocalDate.parse(entrega.data_)
+                                    val qtd = clientes[entregas.indexOf(entrega)]
+                                    Row(Modifier.fillMaxWidth().border(1.dp, Color.Black), Arrangement.SpaceAround){
+                                        Text(entrega.id.toString(), Modifier.fillMaxWidth(0.1f).padding(8.dp))
+                                        Text(entrega.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text(localDateTime.format(formatter).toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        Text(qtd.toString(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                                        IconButton(onClick = {navigator.push(ViewTabelaScreen(entrega.id))}){
+                                            if(entrega.pedencia<1L){
+                                                Icon(imageVector =  Icons.Default.Search,"icone de informação")
+                                            }else{
+                                                Icon(imageVector =  Icons.Default.Search,"icone de informação",tint = Color.Red)
+                                            }
+                                        }
+                                    }
                                 }
                             }
+                            VerticalScrollbar(
+                                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                                adapter = rememberScrollbarAdapter(
+                                    scrollState = state
+                                )
+                            )
                         }
                     }
                 }

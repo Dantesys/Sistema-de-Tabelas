@@ -28,6 +28,7 @@ import repository.Repository
 import telas.ListClienteScreen
 import telas.ListTabelaScreen
 import telas.NewTabelaScreen
+import util.importClientes
 
 @Composable
 fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment.Horizontal,navigator: Navigator,inicio:Boolean=true,ntabela:Boolean=false,vtabela:Boolean=false,vcliente:Boolean=false){
@@ -36,6 +37,7 @@ fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment
     val cidade = remember {mutableStateOf("")}
     val bairro = remember {mutableStateOf("")}
     val newState = remember { mutableStateOf(false) }
+    val aviso = remember { mutableStateOf(0) }
     Column(
         modifier,
         arrangement,
@@ -112,6 +114,29 @@ fun menu(modifier: Modifier,arrangement:Arrangement.Vertical,alignment:Alignment
                 Spacer(modifier = Modifier.padding(10.dp))
                 Text("Ver Tabelas")
             }
+        }
+        Button(onClick = {aviso.value = importClientes()}, Modifier.fillMaxWidth(0.9f),
+            shape = RoundedCornerShape(10.dp)){
+            Icon(imageVector =  Icons.Default.ImportExport,"icone de importação")
+            Spacer(modifier = Modifier.padding(10.dp))
+            Text("Importar Clientes")
+        }
+        if(aviso.value>0){
+            AlertDialog(onDismissRequest = {aviso.value = 0},
+                title = {Text("Aviso!", style = TextStyle(fontSize = 30.sp))},
+                text = {
+                    Column{
+                        Text("${aviso.value} Clientes Importados Com Sucesso!", style = TextStyle(fontSize = 20.sp))
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {aviso.value = 0},
+                        border = BorderStroke(2.dp,Color.Green),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(204,255,204),contentColor = Color.Green)) {
+                        Text("Ok")
+                    }
+                }
+            )
         }
     }
 }

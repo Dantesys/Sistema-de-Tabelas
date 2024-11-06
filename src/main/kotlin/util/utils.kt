@@ -9,11 +9,14 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts
 import org.apache.pdfbox.printing.PDFPageable
+import org.apache.poi.openxml4j.opc.OPCPackage
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.vandeseer.easytable.TableDrawer
 import org.vandeseer.easytable.settings.HorizontalAlignment
 import org.vandeseer.easytable.structure.Row
 import org.vandeseer.easytable.structure.Table
 import org.vandeseer.easytable.structure.cell.TextCell
+import repository.Repository
 import java.awt.Color
 import java.awt.print.PrinterJob
 import java.io.File
@@ -129,4 +132,25 @@ fun Long.toBrazilianDateFormat(pattern: String = "dd/MM/yyyy"):String {
         timeZone = TimeZone.getTimeZone("GMT")
     }
     return formatter.format(date)
+}
+fun importClientes():Int{
+    val file = File("./importation.xlsx")
+    if(!file.exists()) return 0
+    val arquivo = OPCPackage.open(file)
+    val planilha = XSSFWorkbook(arquivo)
+    val tabela = planilha.getSheetAt(0)
+    val linhas = tabela.iterator()
+    var cont = 0
+    while(linhas.hasNext()){
+        val linha = linhas.next()
+        val celulas = linha.cellIterator()
+        val celCod = celulas.next()
+        val celNome = celulas.next()
+        val celCidade = celulas.next()
+        val celBairro = celulas.next()
+        Repository.addCliente(celCod.numericCellValue.toLong(),celNome.stringCellValue,celCidade.stringCellValue,celBairro.stringCellValue)
+        cont++
+    }
+    arquivo.close()
+    return cont
 }

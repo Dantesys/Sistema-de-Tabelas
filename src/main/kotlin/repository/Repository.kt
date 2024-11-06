@@ -83,15 +83,19 @@ class Repository {
             return ResultListC(clientes,pages)
         }
         fun getInicio():ResultInicio{
-            val entregas = EntregaDAO.selecionaInicio()
-            val qtdClientes = mutableListOf<Long>()
-            entregas.map { e ->
-                qtdClientes.add(PedidoDAO.contarClientes(e.id))
-            }
             val entregasP = EntregaDAO.getPedencias()
             val qtdClientesP = mutableListOf<Long>()
             entregasP.map { e ->
                 qtdClientesP.add(PedidoDAO.contarClientes(e.id))
+            }
+            var limit = 5L
+            if(entregasP.isEmpty()){
+                limit = 10L
+            }
+            val entregas = EntregaDAO.selecionaInicio(limit)
+            val qtdClientes = mutableListOf<Long>()
+            entregas.map { e ->
+                qtdClientes.add(PedidoDAO.contarClientes(e.id))
             }
             return ResultInicio(entregas,qtdClientes,entregasP,qtdClientesP)
         }

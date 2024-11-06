@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS Entrega (
 adicionar:
 INSERT OR REPLACE INTO Entrega (id,nome,data,pedencia) VALUES (:id,:nome,:data,:pedencia);
 selectJoin:
-SELECT * FROM Entrega WHERE pedencia<=0 ORDER BY data DESC LIMIT 5;
+SELECT * FROM Entrega WHERE pedencia<=0 ORDER BY data DESC LIMIT :limit;
 selectJoinP:
 SELECT * FROM Entrega WHERE pedencia>0 ORDER BY data DESC LIMIT 5;
 selectEntregaID:

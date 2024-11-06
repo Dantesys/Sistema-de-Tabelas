@@ -8,9 +8,9 @@ import repository.getDB
 class EntregaDAO{
     companion object {
         private val db:Database = getDB()
-        fun selecionaInicio():List<Entrega>{
+        fun selecionaInicio(limit:Long):List<Entrega>{
             val entregaQueries: EntregaQueries = db.entregaQueries
-            return entregaQueries.selectJoin().executeAsList()
+            return entregaQueries.selectJoin(limit).executeAsList()
         }
         fun getPedencias():List<Entrega>{
             val entregaQueries: EntregaQueries = db.entregaQueries

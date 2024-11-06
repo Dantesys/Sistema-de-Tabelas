@@ -7,7 +7,7 @@ plugins {
     id("app.cash.sqldelight") version "2.0.2"
 }
 group = "com.dantesys"
-version = "1.1.1"
+version = "1.2.0"
 repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
@@ -33,6 +33,7 @@ dependencies {
     implementation("org.apache.pdfbox:pdfbox:3.0.3")
     implementation("com.github.vandeseer:easytable:1.0.2")
     implementation("sh.calvin.reorderable:reorderable:2.4.0")
+    implementation("org.apache.poi:poi-ooxml:3.9")
 }
 
 sqldelight {

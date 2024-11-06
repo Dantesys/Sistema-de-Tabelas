@@ -1,9 +1,10 @@
 package telas
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,9 +73,15 @@ class ListClienteScreen: Screen {
                     Row(Modifier.fillMaxWidth().padding(10.dp),Arrangement.Center,verticalAlignment = Alignment.CenterVertically){
                         OutlinedTextField(filtro.value,{filtro.value = it},label = { Text("Buscar") },singleLine = true,
                             trailingIcon = {
-                                IconButton(onClick = {screenModel.getClientes(filtro.value,page.value.toInt(),cod.value,nom.value,cid.value,bai.value)}){
+                                IconButton(onClick = {page.value=1L;screenModel.getClientes(filtro.value,page.value.toInt(),cod.value,nom.value,cid.value,bai.value)}){
                                     Icon(imageVector =  Icons.Default.Search,"icone de busca",modifier = Modifier.size(20.dp))
                                 }
+                            },modifier = Modifier.onKeyEvent{
+                                if(it.type == KeyEventType.KeyUp && (it.key == Key.Enter) || (it.key==Key.NumPadEnter)){
+                                    page.value=1L
+                                    screenModel.getClientes(filtro.value,page.value.toInt(),cod.value,nom.value,cid.value,bai.value)
+                                }
+                                false
                             }
                         )
                         Spacer(modifier = Modifier.padding(10.dp))
@@ -117,34 +125,49 @@ class ListClienteScreen: Screen {
                             }
                         }
                     }
-                    Row(Modifier.fillMaxWidth(0.75f).border(1.dp, Color.Black), Arrangement.SpaceAround){
-                        Text("Código", Modifier.fillMaxWidth(0.1f).padding(8.dp))
-                        Text("Nome", Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                        Text("Cidade", Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                        Text("Bairro", Modifier.padding(8.dp))
-                        Text("Editar", Modifier.padding(8.dp))
-                    }
-                    for (cliente in clientes){
-                        Row(Modifier.fillMaxWidth(0.75f).border(1.dp, Color.Black), Arrangement.SpaceAround){
-                            Text(cliente.codigo.toString(), Modifier.fillMaxWidth(0.1f).padding(8.dp))
-                            if(cliente.nome!=null){
-                                Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                            }else{
-                                Text("", Modifier.fillMaxWidth(0.4f).padding(8.dp))
+                    Row(Modifier.fillMaxWidth(),Arrangement.SpaceAround, Alignment.CenterVertically){
+                        Box(Modifier.fillMaxSize().padding(50.dp).align(Alignment.CenterVertically)) {
+                            val state = rememberLazyListState()
+                            LazyColumn(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,state = state) {
+                                item{
+                                    Row(Modifier.fillMaxWidth().border(1.dp, Color.Black), Arrangement.SpaceAround){
+                                        Text("Código", Modifier.fillMaxWidth(0.1f).padding(8.dp))
+                                        Text("Nome", Modifier.fillMaxWidth(0.3f).padding(8.dp))
+                                        Text("Cidade", Modifier.fillMaxWidth(0.2f).padding(8.dp))
+                                        Text("Bairro", Modifier.fillMaxWidth(0.3f).padding(8.dp))
+                                        Text("Editar", Modifier.padding(8.dp))
+                                    }
+                                }
+                                itemsIndexed(clientes){ _, cliente ->
+                                    Row(Modifier.fillMaxWidth().border(1.dp, Color.Black), Arrangement.SpaceAround){
+                                        Text(cliente.codigo.toString(), Modifier.fillMaxWidth(0.1f).padding(8.dp))
+                                        if(cliente.nome!=null){
+                                            Text(cliente.nome.uppercase(), Modifier.fillMaxWidth(0.3f).padding(8.dp))
+                                        }else{
+                                            Text("", Modifier.fillMaxWidth(0.3f).padding(8.dp))
+                                        }
+                                        if(cliente.cidade!=null){
+                                            Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.2f).padding(8.dp))
+                                        }else{
+                                            Text("", Modifier.fillMaxWidth(0.2f).padding(8.dp))
+                                        }
+                                        if(cliente.bairro!=null){
+                                            Text(cliente.bairro.uppercase(), Modifier.fillMaxWidth(0.3f).padding(8.dp))
+                                        }else{
+                                            Text("", Modifier.fillMaxWidth(0.3f).padding(8.dp))
+                                        }
+                                        IconButton(onClick = {cCodigo.value=cliente.codigo;cNome.value=cliente.nome.toString();cCidade.value= cliente.cidade.toString();cBairro.value=cliente.bairro.toString();editState.value=true}){
+                                            Icon(imageVector =  Icons.Default.Edit,"icone de informação")
+                                        }
+                                    }
+                                }
                             }
-                            if(cliente.cidade!=null){
-                                Text(cliente.cidade.uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                            }else{
-                                Text("", Modifier.fillMaxWidth(0.4f).padding(8.dp))
-                            }
-                            if(cliente.bairro!=null){
-                                Text(cliente.bairro.uppercase(), Modifier.padding(8.dp))
-                            }else{
-                                Text("", Modifier.padding(8.dp))
-                            }
-                            IconButton(onClick = {cCodigo.value=cliente.codigo;cNome.value=cliente.nome.toString();cCidade.value= cliente.cidade.toString();cBairro.value=cliente.bairro.toString();editState.value=true}){
-                                Icon(imageVector =  Icons.Default.Edit,"icone de informação")
-                            }
+                            VerticalScrollbar(
+                                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                                adapter = rememberScrollbarAdapter(
+                                    scrollState = state
+                                )
+                            )
                         }
                     }
                 }
