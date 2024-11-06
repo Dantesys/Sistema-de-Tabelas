@@ -134,7 +134,7 @@ fun Long.toBrazilianDateFormat(pattern: String = "dd/MM/yyyy"):String {
     return formatter.format(date)
 }
 fun importClientes():Int{
-    val file = File("./importation.xlsx")
+    val file = File("./import.xlsx")
     if(!file.exists()) return 0
     val arquivo = OPCPackage.open(file)
     val planilha = XSSFWorkbook(arquivo)
