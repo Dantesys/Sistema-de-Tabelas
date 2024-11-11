@@ -159,7 +159,8 @@ class EditTabelaScreen(val id:Long) : Screen {
                                                 Column(horizontalAlignment = Alignment.CenterHorizontally){
                                                     Icon(imageVector =  Icons.Default.Edit,"icone de editar")
                                                 }
-                                            }IconButton(onClick = {cCodigo.value=cliente.codigo;pos.value=num.toLong();deleteState.value=true}){
+                                            }
+                                            IconButton(onClick = {cCodigo.value=cliente.codigo;pos.value=num.toLong();deleteState.value=true}){
                                                 Column(horizontalAlignment = Alignment.CenterHorizontally){
                                                     Icon(imageVector =  Icons.Default.Delete,"icone de excluir")
                                                 }
