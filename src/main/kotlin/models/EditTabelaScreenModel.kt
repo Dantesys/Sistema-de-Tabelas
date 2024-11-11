@@ -19,14 +19,18 @@ class EditTabelaScreenModel : StateScreenModel<EditTabelaScreenModel.State>(Stat
             mutableState.value = State.Result(resultado.entrega,resultado.clientes)
         }
     }
-    fun editCliente(cliente: Cliente,id:Long){
+    fun editCliente(cliente: Cliente,id:Long,pos:Long,cant:Long){
         screenModelScope.launch {
             mutableState.value = State.Loading
             Repository.editCliente(cliente)
             Repository.attPedencia(cliente.codigo)
+            Repository.attClienteEntrega(cliente.codigo,id,pos,cant)
             val resultado = Repository.getView(id)
             mutableState.value = State.Result(resultado.entrega,resultado.clientes)
         }
+    }
+    fun removerCliente(cliente:Long,pos:Long,entrega:Long){
+        Repository.delClienteEntrega(cliente,pos,entrega)
     }
     fun editEntrega(entrega: Entrega,clientes:List<Cliente>){
         screenModelScope.launch {

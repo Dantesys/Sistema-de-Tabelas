@@ -48,6 +48,13 @@ class Repository {
                 EntregaDAO.novaEntrega(Entrega(pEntrega.id,pEntrega.nome,pEntrega.data_,pedencia))
             }
         }
+        fun attClienteEntrega(cliente:Long,entrega:Long,pos:Long,cant:Long){
+            PedidoDAO.remove(cant,entrega)
+            PedidoDAO.add(cliente,entrega,pos)
+        }
+        fun delClienteEntrega(cliente:Long,pos:Long,entrega:Long){
+            PedidoDAO.removePos(cliente,pos,entrega)
+        }
         fun editEntrega(entrega: Entrega,clientes: List<Cliente>){
             PedidoDAO.removeAll(entrega)
             addEntregaCliente(entrega,clientes)

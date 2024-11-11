@@ -65,22 +65,22 @@ class ViewTabelaScreen(val id:Long) : Screen {
                 )
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
+                        Text(entrega.nome.uppercase()+" - "+localDateTime.format(formatter).toString(), style = TextStyle(fontSize = 30.sp))
+                    }
+                    Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
                         Button(onClick = {imprimir(entrega,clientes)},
                             border = BorderStroke(2.dp,Color.Black),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
                             Text("Imprimir")
                             Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
                         }
-                        Text(entrega.nome.uppercase()+" - "+localDateTime.format(formatter).toString(), style = TextStyle(fontSize = 30.sp))
                         Button(onClick = {dialogState.value = gerarPDF(entrega,clientes)},
                             border = BorderStroke(2.dp,Color.Black),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
                             Text("Salvar PDF")
                             Icon(imageVector =  Icons.Default.PictureAsPdf,"icone de salvar")
                         }
-                    }
-                    if(entrega.pedencia>0){
-                        Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
+                        if(entrega.pedencia>0){
                             Button(onClick = {navigator.push(EditTabelaScreen(id))},
                                 border = BorderStroke(2.dp,Color.Black),
                                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){

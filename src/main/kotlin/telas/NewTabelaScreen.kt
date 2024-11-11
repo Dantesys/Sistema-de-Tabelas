@@ -48,7 +48,6 @@ import models.NewTabelaScreenModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import telas.parts.menu
-import util.imprimir
 import util.toBrazilianDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -114,14 +113,6 @@ class NewTabelaScreen : Screen {
                 )
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
-                        Column(horizontalAlignment = Alignment.CenterHorizontally){
-                            Button(onClick = {dialogState.value = imprimirSave(Entrega(numero.value,nome.value,data.value,0L),screenModel,getClientes(clientes))},
-                                border = BorderStroke(2.dp,Color.Black),
-                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
-                                Text("Salvar e Imprimir")
-                                Icon(imageVector =  Icons.Default.Print,"icone de imprimir")
-                            }
-                        }
                         Column(horizontalAlignment = Alignment.CenterHorizontally){
                             Button(onClick = {dialogState.value = salvar(Entrega(numero.value,nome.value,data.value,0L),screenModel,getClientes(clientes))},
                                 border = BorderStroke(2.dp,Color.Black),
@@ -344,12 +335,6 @@ class NewTabelaScreen : Screen {
         val localDateTime = LocalDate.parse(entrega.data_,formatteroriginal)
         val dataf = localDateTime.format(formatter).toString()
         screenModel.criarEntrega(Entrega(entrega.id,entrega.nome,dataf,entrega.pedencia),clientes)
-        return true
-    }
-    private fun imprimirSave(entrega: Entrega, screenModel: NewTabelaScreenModel, clientes:List<Cliente>):Boolean{
-        if(salvar(entrega,screenModel,clientes)){
-            imprimir(entrega,clientes)
-        }
         return true
     }
 }

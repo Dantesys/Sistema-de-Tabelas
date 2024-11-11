@@ -25,6 +25,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.print.attribute.HashPrintRequestAttributeSet
+import javax.print.attribute.standard.Copies
 import javax.print.attribute.standard.Sides
 
 fun gerarDoc(entrega:Entrega,clientes:List<Cliente>):PDDocument{
@@ -114,6 +115,7 @@ fun imprimir(entrega: Entrega, clientes:List<Cliente>){
     job.setPageable(PDFPageable(document))
     val att = HashPrintRequestAttributeSet()
     att.add(Sides.TWO_SIDED_LONG_EDGE)
+    att.add(Copies(1))
     if(job.printDialog(att)){
         job.print(att)
     }

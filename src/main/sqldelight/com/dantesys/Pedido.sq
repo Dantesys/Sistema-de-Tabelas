@@ -5,6 +5,10 @@ CREATE TABLE IF NOT EXISTS Pedido (
     FOREIGN KEY(clienteID) REFERENCES Cliente(codigo),
     FOREIGN KEY(entregaID) REFERENCES Entrega(id)
 );
+removerCompleto:
+DELETE FROM Pedido WHERE clienteID=:clienteID AND posicao=:posicao AND entregaID=:entregaID;
+removerCliente:
+DELETE FROM Pedido WHERE clienteID=:clienteID AND entregaID=:entregaID;
 removerEntrega:
 DELETE FROM Pedido WHERE entregaID=:entregaID;
 adicionar:

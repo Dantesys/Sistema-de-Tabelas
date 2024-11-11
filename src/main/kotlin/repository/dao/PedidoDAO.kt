@@ -10,6 +10,14 @@ class PedidoDAO {
             val pedidoQueries = db.pedidoQueries
             return pedidoQueries.selecionarEntregasbyCliente(id).executeAsList()
         }
+        fun remove(clienteID:Long,entregaID:Long){
+            val pedidoQueries = db.pedidoQueries
+            pedidoQueries.removerCliente(clienteID,entregaID)
+        }
+        fun removePos(clienteID:Long,pos:Long,entregaID:Long){
+            val pedidoQueries = db.pedidoQueries
+            pedidoQueries.removerCompleto(clienteID,pos,entregaID)
+        }
         fun getPedidosByEntrega(id:Long): List<Pedido> {
             val pedidoQueries = db.pedidoQueries
             return pedidoQueries.selecionarClientesbyEntrega(id).executeAsList()

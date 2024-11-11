@@ -7,8 +7,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -35,7 +35,6 @@ import com.dantesys.Entrega
 import models.EditTabelaScreenModel
 import telas.parts.loadingContent
 import telas.parts.menu
-import util.imprimir
 import util.toBrazilianDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -61,6 +60,7 @@ class EditTabelaScreen(val id:Long) : Screen {
     fun edittabelaScreen(entrega: Entrega, clientes:List<Cliente>, navigator: Navigator, screenModel:EditTabelaScreenModel) {
         val dialogState = remember { mutableStateOf(false) }
         val editState = remember { mutableStateOf(false) }
+        val deleteState = remember { mutableStateOf(false) }
         val cNome = remember { mutableStateOf("") }
         val cCidade = remember { mutableStateOf("") }
         val cBairro = remember { mutableStateOf("") }
@@ -73,6 +73,8 @@ class EditTabelaScreen(val id:Long) : Screen {
         val formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val localDateTime = LocalDate.parse(entrega.data_)
         val data = remember { mutableStateOf(localDateTime.format(formatter)) }
+        val pos = remember { mutableLongStateOf(0) }
+        val cant = remember { mutableLongStateOf(0) }
         Box(Modifier.fillMaxSize()){
             if (showDatePickerDialog) {
                 DatePickerDialog(
@@ -101,13 +103,9 @@ class EditTabelaScreen(val id:Long) : Screen {
                 )
                 Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally){
                     Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
-                        Button(onClick = {dialogState.value = imprimirSave(Entrega(entrega.id,nome.value,localDateTime.format(formatter2),entrega.pedencia),clientes,screenModel)},
-                            border = BorderStroke(2.dp,Color.Black),
-                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
-                            Text("Salvar e imprimir")
-                            Icon(imageVector =  Icons.Default.Print,"icone de imprensão")
-                        }
                         Text("Entrega Nº"+entrega.id.toString(), style = TextStyle(fontSize = 30.sp))
+                    }
+                    Row(Modifier.fillMaxWidth(0.8f),Arrangement.SpaceAround, Alignment.CenterVertically){
                         Button(onClick = {dialogState.value = salvar(Entrega(entrega.id,nome.value,localDateTime.format(formatter2),entrega.pedencia),clientes,screenModel)},
                             border = BorderStroke(2.dp,Color.Black),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(232,232,232),contentColor = Color.Black)){
@@ -157,9 +155,13 @@ class EditTabelaScreen(val id:Long) : Screen {
                                         Text(cliente.cidade.toString().uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                         Text(cliente.bairro.toString().uppercase(), Modifier.fillMaxWidth(0.4f).padding(8.dp))
                                         if(p){
-                                            IconButton(onClick = {cCodigo.value=cliente.codigo;cNome.value=cliente.nome.toString();cCidade.value= cliente.cidade.toString();cBairro.value=cliente.bairro.toString();editState.value=true}){
+                                            IconButton(onClick = {cCodigo.value=cliente.codigo;cant.value=cliente.codigo;cNome.value=cliente.nome.toString();cCidade.value= cliente.cidade.toString();cBairro.value=cliente.bairro.toString();pos.value=num.toLong();editState.value=true}){
                                                 Column(horizontalAlignment = Alignment.CenterHorizontally){
                                                     Icon(imageVector =  Icons.Default.Edit,"icone de editar")
+                                                }
+                                            }IconButton(onClick = {cCodigo.value=cliente.codigo;pos.value=num.toLong();deleteState.value=true}){
+                                                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                                                    Icon(imageVector =  Icons.Default.Delete,"icone de excluir")
                                                 }
                                             }
                                         }
@@ -210,7 +212,7 @@ class EditTabelaScreen(val id:Long) : Screen {
                         }
                     },
                     confirmButton = {
-                        Button(onClick = {screenModel.editCliente(Cliente(cCodigo.value,cNome.value,cCidade.value,cBairro.value),entrega.id);editState.value = false;navigator.push(EditTabelaScreen(id))},
+                        Button(onClick = {screenModel.editCliente(Cliente(cCodigo.value,cNome.value,cCidade.value,cBairro.value),entrega.id,pos.value,cant.value);editState.value = false;navigator.push(EditTabelaScreen(id))},
                             border = BorderStroke(2.dp,Color.Green),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(204,255,204),contentColor = Color.Green)
                         ) {
@@ -219,16 +221,36 @@ class EditTabelaScreen(val id:Long) : Screen {
                     }
                 )
             }
+            if(deleteState.value){
+                AlertDialog(onDismissRequest = {deleteState.value = false},
+                    title = {Text("EXCLUIR", style = TextStyle(fontSize = 30.sp))},
+                    text = {
+                        Column{
+                            Text("Tem certeza que deseja excluir o cliente!", style = TextStyle(fontSize = 20.sp))
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = {deleteState.value = false},
+                            border = BorderStroke(2.dp,Color.Red),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(255,204,204),contentColor = Color.Red)
+                        ) {
+                            Text("Não")
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {screenModel.removerCliente(cCodigo.value,pos.value,entrega.id);deleteState.value = false;navigator.push(EditTabelaScreen(id))},
+                            border = BorderStroke(2.dp,Color.Green),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(204,255,204),contentColor = Color.Green)
+                        ) {
+                            Text("Sim")
+                        }
+                    }
+                )
+            }
         }
     }
     private fun salvar(entrega: Entrega,clientes:List<Cliente>, screenModel: EditTabelaScreenModel):Boolean{
         screenModel.editEntrega(entrega,clientes)
-        return true
-    }
-    private fun imprimirSave(entrega: Entrega,clientes:List<Cliente>, screenModel: EditTabelaScreenModel):Boolean{
-        if(salvar(entrega,clientes,screenModel)){
-            imprimir(entrega,clientes)
-        }
         return true
     }
 }
